@@ -4,7 +4,10 @@
 
 ;;; Code:
 
-(add-to-list 'load-path "~/.emacs.d/lisp/benchmark-init")
+(add-to-list 'load-path (concat
+			 (file-name-as-directory
+			  (expand-file-name "user-lisp" user-emacs-directory))
+			 "benchmark-init"))
 (require 'benchmark-init-loaddefs)
 (benchmark-init/activate)
 
