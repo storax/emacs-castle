@@ -38,7 +38,8 @@ values."
      latex
      markdown
      org
-     python
+     (python :variables
+             python-test-runner nil)
      ruby
      search-engine
      (shell :variables
@@ -85,7 +86,8 @@ values."
      storax-helm-icons
      storax-smartparens
      storax-flycheck
-     storax-projectile)
+     storax-projectile
+     storax-python)
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
@@ -321,6 +323,7 @@ layers configuration. You are free to put any user code."
       (interactive)
       (kill-new isearch-string))
     (bind-key "M-w" 'storax/isearch-kill isearch-mode-map))
+
   ;; Builtin Auto Modes
   (add-to-list 'auto-mode-alist '("\\.qss$" . css-mode))
   ;; Aliases
