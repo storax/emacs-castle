@@ -16,7 +16,7 @@
 (defconst storax-helm-packages
   '(helm))
 
-(defun storax-helm/post-init-helm ()
+(defun storax-helm-icons/post-init-helm ()
   (use-package helm
     :defer t
     :config
