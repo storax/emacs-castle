@@ -27,7 +27,7 @@ values."
      asciidoc
      auto-completion
      better-defaults
-     dash
+     ;; dash
      django
      emacs-lisp
      git
@@ -46,19 +46,48 @@ values."
      shell-scripts
      spacemacs-layouts
      syntax-checking
-     theming
+     (theming
+      :variables theming-modifications
+      '((zenburn (avy-background-face :background "#3F3F3F" :foreground "#757565" :inverse-video nil)
+                 (avy-lead-face :background "#E8BF6A" :foreground "black" :inverse-video nil)
+                 (avy-lead-face-0 :background "#C45837" :foreground "white" :inverse-video nil)
+                 (avy-lead-face-1 :background "#6D9CBE" :foreground "black")
+                 (avy-lead-face-2 :background "#B4C973" :foreground "black")
+                 (diff-hl-change :background "#4F4F4F" :foreground "#FF88FF")
+                 (diff-hl-delete :background "#4F4F4F" :foreground "#FF5353")
+                 (diff-hl-insert :background "#4F4F4F" :foreground "#7FFF7F")
+                 (font-latex-sectioning-5-face :inherit fixed-pitch :foreground "#CC9393" :weight bold)
+                 (git-gutter:modified :background "#DC8CC3" :foreground "#3F3F3F" :weight bold)
+                 (mode-line :background "#2B2B2B" :foreground "#8FB28F" :box nil :overline "dim gray")
+                 (mode-line-inactive :background "#383838" :foreground "#5F7F5F" :box nil :overline "dim gray")
+                 (powerline-inactive1 :inherit mode-line-inactive :background "#4F4F4F" :foreground "#7F9F7F")
+                 (powerline-inactive2 :inherit mode-line-inactive :background "#6F6F6F" :foreground "#9FC29F")
+                 (region :background "#222222")
+                 (scroll-bar :background "#545450" :foreground "#3F3F3F"))))
      vagrant
      version-control
      xkcd
      yaml
-     )
+     storax-utils
+     storax-unkillable-scratch
+     storax-ace-window
+     storax-avy
+     storax-desktop
+     storax-popup
+     storax-dabbrev
+     storax-expand-region
+     storax-fold-dwim
+     storax-multiple-cursors
+     storax-drag-stuff
+     storax-iedit
+     storax-helm)
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '()
    ;; A list of packages and/or extensions that will not be install and loaded.
-   dotspacemacs-excluded-packages '()
+   dotspacemacs-excluded-packages '(vi-tilde-fringe)
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
    ;; are declared in a layer which is not a member of
    ;; the list `dotspacemacs-configuration-layers'. (default t)
@@ -254,12 +283,44 @@ values."
 It is called immediately after `dotspacemacs/init'.  You are free to put almost
 any user code here.  The exception is org related code, which should be placed
 in `dotspacemacs/user-config'."
+  (setq user-full-name "David Zuber"
+        user-mail-address "zuber.david@gmx.de"
+        vs-follow-symlinks t ; When following sysmlinks always go to the destination
+        require-final-newline t
+        indicate-empty-lines t)
   )
 
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
+  ;; nicer regexp syntax
+  (use-package re-builder
+    :defer t
+    :config
+    (setq reb-re-syntax 'string))
+  ;; Oldschool fringe
+  (use-package fringe-helper
+    :config
+    (fringe-helper-define 'storax-empty-line '(top repeat)
+      "..XXXX.."
+      "........")
+    (add-to-list 'fringe-indicator-alist '(empty-line . storax-empty-line)))
+  ;; isearch
+  (use-package isearch
+    :defer t
+    :init
+    (defun storax/isearch-kill ()
+      "Push current matching string into kill ring."
+      (interactive)
+      (kill-new isearch-string))
+    (bind-key "M-w" 'storax/isearch-kill isearch-mode-map))
+  ;; Builtin Auto Modes
+  (add-to-list 'auto-mode-alist '("\\.qss$" . css-mode))
+  ;; Aliases
+  (defalias 'rs 'replace-string)
+  (defalias 'jo 'just-one-space)
+  (defalias 'qrr 'query-replace-regexp)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
