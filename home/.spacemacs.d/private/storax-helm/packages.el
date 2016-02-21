@@ -30,6 +30,7 @@
           helm-kill-ring-threshold 2
           helm-candidate-number-limit 400)
     :config
+    (bind-key "M-i" 'helm-swoop-from-isearch isearch-mode-map)
     (helm-adaptive-mode 1)
     (helm-push-mark-mode 1)
     (advice-add #'helm-preselect :around #'storax/helm-skip-dots)
@@ -38,8 +39,6 @@
 (defun storax-helm/post-init-helm-swoop ()
   (use-package helm-swoop
     :defer t
-    :init
-    (bind-key "M-i" 'helm-swoop-from-isearch isearch-mode-map)
     :config
     (bind-key "C-r" 'helm-previous-line helm-swoop-map)
     (bind-key "C-s" 'helm-next-line helm-swoop-map)

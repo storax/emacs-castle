@@ -84,7 +84,8 @@ values."
      storax-helm
      storax-helm-icons
      storax-smartparens
-     storax-flycheck)
+     storax-flycheck
+     storax-projectile)
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
