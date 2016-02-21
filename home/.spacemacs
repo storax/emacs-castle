@@ -30,6 +30,7 @@ values."
      ;; dash
      django
      emacs-lisp
+     erc
      git
      github
      html
