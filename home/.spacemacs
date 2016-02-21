@@ -82,7 +82,9 @@ values."
      storax-drag-stuff
      storax-iedit
      storax-helm
-     storax-helm-icons)
+     storax-helm-icons
+     storax-smartparens
+     storax-flycheck)
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
@@ -297,6 +299,7 @@ in `dotspacemacs/user-config'."
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
   ;; nicer regexp syntax
+
   (use-package re-builder
     :defer t
     :config
