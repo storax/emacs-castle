@@ -87,7 +87,11 @@ values."
      storax-smartparens
      storax-flycheck
      storax-projectile
-     storax-python)
+     storax-python
+     storax-org
+     storax-magit
+     storax-latex
+     )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
@@ -334,3 +338,32 @@ layers configuration. You are free to put any user code."
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(desktop-auto-save-timeout nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(avy-background-face ((t (:background "#3F3F3F" :foreground "#757565" :inverse-video nil))))
+ '(avy-lead-face ((t (:background "#E8BF6A" :foreground "black" :inverse-video nil))))
+ '(avy-lead-face-0 ((t (:background "#C45837" :foreground "white" :inverse-video nil))))
+ '(avy-lead-face-1 ((t (:background "#6D9CBE" :foreground "black"))))
+ '(avy-lead-face-2 ((t (:background "#B4C973" :foreground "black"))))
+ '(company-tooltip-common ((t (:inherit company-tooltip :weight bold :underline nil))))
+ '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil))))
+ '(diff-hl-change ((t (:background "#4F4F4F" :foreground "#FF88FF"))))
+ '(diff-hl-delete ((t (:background "#4F4F4F" :foreground "#FF5353"))))
+ '(diff-hl-insert ((t (:background "#4F4F4F" :foreground "#7FFF7F"))))
+ '(font-latex-sectioning-5-face ((t (:inherit fixed-pitch :foreground "#CC9393" :weight bold))))
+ '(git-gutter:modified ((t (:background "#DC8CC3" :foreground "#3F3F3F" :weight bold))))
+ '(mode-line ((t (:background "#2B2B2B" :foreground "#8FB28F" :box nil :overline "dim gray"))))
+ '(mode-line-inactive ((t (:background "#383838" :foreground "#5F7F5F" :box nil :overline "dim gray"))))
+ '(powerline-inactive1 ((t (:inherit mode-line-inactive :background "#4F4F4F" :foreground "#7F9F7F"))))
+ '(powerline-inactive2 ((t (:inherit mode-line-inactive :background "#6F6F6F" :foreground "#9FC29F"))))
+ '(region ((t (:background "#222222"))))
+ '(scroll-bar ((t (:background "#545450" :foreground "#3F3F3F")))))

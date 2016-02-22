@@ -34,7 +34,7 @@
 
 (defun storax-magit/post-init-magit ()
   (use-package magit
-    :bind ("C-x g" magit-status)))
+    :bind ("C-x g" . magit-status)))
 
 
 ;;; packages.el ends here
