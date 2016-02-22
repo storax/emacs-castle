@@ -38,7 +38,8 @@ backwards, if negative).  With just prefix moves to first error.
 RESET does nothing."
       (interactive "P")
       (condition-case nil
-          (call-interactively 'flycheck-next-error)
+          (if (flycheck-has-current-errors-p)
+              (call-interactively 'flycheck-next-error))
         (error (progn (flycheck-next-error 1 t)
                       (storax/indicate-error-nav-wrapped 'next)))))
 
@@ -55,26 +56,27 @@ RESET does nothing."
 Prefix argument ARG says how many error messages to move backwards (or
 forwards, if negative)."
       (interactive "P")
-      (condition-case nil
-          (if (eq (point) (point-min))
-              (progn
-                (storax/indicate-error-nav-wrapped 'previous)
-                (goto-char (point-max))
-                (call-interactively 'flycheck-previous-error))
-            (if (compilation-buffer-p (current-buffer))
-                (compilation-previous-error 1)
-              (call-interactively 'flycheck-previous-error)))
-        (error (progn
-                 (let ((error-buffer (next-error-find-buffer)))
-                   ;; If the buffer has an associated error buffer use it to
-                   ;; to move to last error
-                   (if (and (not (eq (current-buffer) error-buffer))
-                            (compilation-buffer-p error-buffer))
-                       (storax/jump-to-last-error error-buffer)
-                     ;; Otherwise move to last point and invoke previous error
-                     (goto-char (point-max))
-                     (call-interactively 'flycheck-previous-error)
-                     (storax/indicate-error-nav-wrapped 'previous)))))))
+      (if (flycheck-has-current-errors-p)
+          (condition-case nil
+              (if (eq (point) (point-min))
+                  (progn
+                    (storax/indicate-error-nav-wrapped 'previous)
+                    (goto-char (point-max))
+                    (call-interactively 'flycheck-previous-error))
+                (if (compilation-buffer-p (current-buffer))
+                    (compilation-previous-error 1)
+                  (call-interactively 'flycheck-previous-error)))
+            (error (progn
+                     (let ((error-buffer (next-error-find-buffer)))
+                       ;; If the buffer has an associated error buffer use it to
+                       ;; to move to last error
+                       (if (and (not (eq (current-buffer) error-buffer))
+                                (compilation-buffer-p error-buffer))
+                           (storax/jump-to-last-error error-buffer)
+                         ;; Otherwise move to last point and invoke previous error
+                         (goto-char (point-max))
+                         (call-interactively 'flycheck-previous-error)
+                         (storax/indicate-error-nav-wrapped 'previous))))))))
 
     (setq flycheck-emacs-lisp-load-path load-path
           flycheck-idle-change-delay 0.8
