@@ -47,6 +47,8 @@
   (use-package python
     :defer t
     :config
+    (add-hook 'python-mode-hook 'storax/set-flycheck-error-function)
+    (bind-key "C-c C-p" 'storax/previous-error-wrapped python-mode-map)
     (bind-key "M-n" 'python-nav-forward-block python-mode-map)
     (bind-key "M-p" 'python-nav-backward-block python-mode-map)))
 

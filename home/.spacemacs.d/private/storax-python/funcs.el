@@ -15,6 +15,9 @@
 
 ;;; Code:
 
+(defun storax/set-flycheck-error-function ()
+  (setq flycheck-display-errors-function #'flycheck-display-error-messages-unless-error-list))
+
 (defun storax/tox (args)
   "Test with tox.
 
