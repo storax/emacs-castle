@@ -319,7 +319,7 @@ in `dotspacemacs/user-config'."
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
   ;; nicer regexp syntax
-
+  (ido-mode -1)
   (use-package re-builder
     :defer t
     :config
@@ -347,6 +347,10 @@ layers configuration. You are free to put any user code."
   (defalias 'rs 'replace-string)
   (defalias 'jo 'just-one-space)
   (defalias 'qrr 'query-replace-regexp)
+  ;; Vars
+  (setq helm-M-x-fuzzy-match nil
+        helm-buffers-fuzzy-matching nil
+        helm-recentf-fuzzy-match    nil)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
