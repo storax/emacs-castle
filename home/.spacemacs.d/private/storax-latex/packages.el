@@ -33,5 +33,4 @@
     :config
     (pdf-tools-install)))
 
-
 ;;; packages.el ends here

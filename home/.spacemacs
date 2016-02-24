@@ -27,7 +27,6 @@ values."
      asciidoc
      auto-completion
      better-defaults
-     ;; dash
      django
      emacs-lisp
      erc
@@ -91,12 +90,26 @@ values."
      storax-org
      storax-magit
      storax-latex
-     )
+     (storax-dash
+      :variables
+      storax/docsets-to-install
+      '("Ansible" "Bash" "Boost" "C" "C++" "CMake" "Chef" "Common_Lisp"
+        "Django" "Docker" "ElasticSearch" "Emacs_Lisp" "Flask" "Jinja"
+        "LaTeX" "PostgreSQL" "Python_2" "Python_3" "SQLAlchemy"
+        "Vagrant" ("Qt_4" . "Qt") ("Emacs" . "emacs"))
+      storax/user-docsets-to-install
+      '("Alembic" "Packer" "PyMel" "Requests" "Sphinx")
+      storax/dash-common-docsets
+      '("Bash" "Common Lisp" "Emacs Lisp" "Packer" "Python 2" "Python 3"
+        "Qt" "Requests" "Sphinx" "Vagrant" "emacs"))
+     storax-visual-regexp-steroids
+     storax-major-mode-icons
+     storax-translate)
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '()
+   dotspacemacs-additional-packages '(org-tfl)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '(vi-tilde-fringe)
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
