@@ -104,7 +104,9 @@ values."
         "Qt" "Requests" "Sphinx" "Vagrant" "emacs"))
      storax-visual-regexp-steroids
      storax-major-mode-icons
-     storax-translate)
+     storax-translate
+     ;; storax-powerline
+     )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
@@ -350,7 +352,8 @@ layers configuration. You are free to put any user code."
   ;; Vars
   (setq helm-M-x-fuzzy-match nil
         helm-buffers-fuzzy-matching nil
-        helm-recentf-fuzzy-match    nil)
+        helm-recentf-fuzzy-match nil
+        undo-tree-visualizer-diff nil)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
