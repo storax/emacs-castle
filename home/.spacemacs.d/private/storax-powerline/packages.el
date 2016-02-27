@@ -14,11 +14,23 @@
 ;;; Code:
 
 (defconst storax-powerline-packages
-  '(spaceline))
+  '(spaceline magit))
 
 (defun storax-powerline/post-init-spaceline ()
   (use-package spaceline-config
     :config
-    nil))
+    (spaceline-define-segment storax/vc-segment
+      (list (storax/powerline-remote default-face) (storax/powerline-vc))
+      :when (or vc-mode (string-match "magit" (format "%s" major-mode))))))
 
+(defun storax-powerline/post-init-magit ()
+  (use-package magit
+    :config
+    (defun storax/setremoteurl ()
+      "Save the current remote url."
+      (make-local-variable 'storax/remoteurl)
+      (setq storax/remoteurl (magit-get "remote" "origin" "url")))
+    ;; Kinda like each time we open a file we set the storax/remoteurl
+    ;; then we can display an icon in the modeline accordingly
+    (add-hook 'after-change-major-mode-hook 'storax/setremoteurl)))
 ;;; packages.el ends here
