@@ -89,6 +89,7 @@ COLOR1 is the color to apply."
 
    `(which-function
      (python-pyvenv :fallback python-pyenv)
+     (storax/spotify-segment :when active)
      (battery :when active)
      selection-info
      input-method

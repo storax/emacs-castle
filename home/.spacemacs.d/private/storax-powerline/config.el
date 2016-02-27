@@ -18,6 +18,7 @@
 (defvar storax-powerline/imgdir
   (file-name-as-directory (concat (file-name-directory load-file-name) "images")))
 
+(defvar storax/spotify-connected nil)
 
 (defvar storax/github-mark-data
   (storax/string-from-file (concat storax-powerline/imgdir "mark-github.svg")))
