@@ -105,7 +105,7 @@ values."
      storax-visual-regexp-steroids
      storax-major-mode-icons
      storax-translate
-     ;; storax-powerline
+     storax-powerline
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
