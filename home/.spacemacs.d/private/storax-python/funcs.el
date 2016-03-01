@@ -26,6 +26,15 @@ ARGS is a string with arguments for tox."
   (projectile-with-default-dir (projectile-project-root)
     (compilation-start (format "tox %s" args) t)))
 
+(defun storax/run-tests (cmd &optional name)
+  "Execute the given CMD via compilation-start"
+  (compilation-start
+   cmd t
+   `(lambda (mode)
+      (progn (if ,name
+                 (format "Test %s: %s" (projectile-project-name) ,name)
+               (format "Test %s: %s" (projectile-project-name) ,cmd))))))
+
 (defun storax/python-test--current-test-name ()
   (let ((name (python-info-current-defun)))
     (if (and name
@@ -98,7 +107,7 @@ TEST is a single test function or nil to test all."
   (interactive (storax/python-test-at-point))
   (let (toxargs '(read-string "Tox arguments: " (car storax/tox-history) 'storax/tox-history))
   (projectile-with-default-dir (projectile-project-root)
-    (compilation-start (format "tox %s" toxargs) t))))
+    (storax/run-tests (format "tox %s" toxargs)))))
 
 (defun storax/run-tox-pytest (toxargs pytestargs top file module test)
   "Run tox with pytest.
@@ -112,13 +121,13 @@ TEST is a single test function or nil to test all."
   (projectile-with-default-dir (projectile-project-root)
     (cond
      (test
-	(compilation-start (concat
+	(storax/run-tests (concat
 			      (format "tox %s -- py.test %s -k \"%s\" %s "
-				      toxargs pytestargs test file)) t))
+				      toxargs pytestargs test file))))
      (module
-      (compilation-start (format "tox %s -- py.test %s %s" toxargs pytestargs file) t))
+      (storax/run-tests (format "tox %s -- py.test %s %s" toxargs pytestargs file)))
      (t
-      (compilation-start (format "tox %s -- py.test %s" toxargs pytestargs) t)))))
+      (storax/run-tests (format "tox %s -- py.test %s" toxargs pytestargs))))))
 
 (defun storax/python-test-tox-pytest-runner (top file module test)
   "Test the project using tox and pytest.

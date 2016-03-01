@@ -14,11 +14,17 @@
 ;;; Code:
 
 (defconst storax-drag-stuff-packages
-  '(drag-stuff))
+  '(drag-stuff, diminish))
 
 (defun storax-drag-stuff/init-drag-stuff ()
   (use-package drag-stuff
     :config
     (drag-stuff-global-mode t)))
+
+(defun storax-drag-stuff/post-init-diminish ()
+  (use-package diminish
+    :init
+      (with-eval-after-load 'drag-stuff
+        (diminish 'drag-stuff-mode))))
 
 ;;; packages.el ends here
