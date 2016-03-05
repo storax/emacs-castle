@@ -14,7 +14,7 @@
 ;;; Code:
 
 (defconst storax-helm-packages
-  '(helm helm-swoop))
+  '(helm helm-swoop helm-ag))
 
 (defun storax-helm/post-init-helm ()
   (use-package helm
@@ -44,5 +44,34 @@
     (bind-key "C-s" 'helm-next-line helm-swoop-map)
     (bind-key "C-r" 'helm-previous-line helm-multi-swoop-map)
     (bind-key "C-s" 'helm-next-line helm-multi-swoop-map)))
+
+(defun storax-helm/post-init-helm-ag ()
+  (use-package helm-ag
+    :defer t
+    :config
+    (defun helm-ag--do-ag-set-command ()
+      (let ((cmd-opts (split-string helm-ag-base-command nil t)))
+        (when helm-ag-command-option
+          (setq cmd-opts (append cmd-opts (split-string helm-ag-command-option nil t))))
+        (when helm-ag--extra-options
+          (setq cmd-opts (append cmd-opts (split-string helm-ag--extra-options))))
+        (when helm-ag-use-agignore
+          (helm-aif (helm-ag--root-agignore)
+              (setq cmd-opts (append cmd-opts (list "-p" it)))))
+        (when helm-ag-ignore-patterns
+          (setq cmd-opts
+                (append cmd-opts
+                        (mapcar 'helm-ag--construct-ignore-option
+                                helm-ag-ignore-patterns))))
+        (when helm-do-ag--extensions
+          (setq cmd-opts (append cmd-opts (helm-ag--construct-extension-options))))
+        (let (targets)
+          (when helm-ag--buffer-search
+            (setq targets (helm-ag--file-visited-buffers)))
+          (setq helm-do-ag--commands
+                (cons cmd-opts
+                      (if helm-ag--default-target
+                          (append targets (helm-ag--construct-targets helm-ag--default-target))
+                        targets))))))))
 
 ;;; packages.el ends here
