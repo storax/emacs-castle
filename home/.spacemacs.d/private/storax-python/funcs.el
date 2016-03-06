@@ -53,14 +53,9 @@ ARGS is a string with arguments for tox."
   (projectile-with-default-dir (projectile-project-root)
     (compilation-start (format "tox%s %s" (storax/tox-construct-env-arg envs) args) t)))
 
-(defun storax/run-tests (cmd &optional name)
-  "Execute the given CMD via compilation-start"
-  (compilation-start
-   cmd t
-   `(lambda (mode)
-      (progn (if ,name
-                 (format "Test %s: %s" (projectile-project-name) ,name)
-               (format "Test %s: %s" (projectile-project-name) ,cmd))))))
+(defun storax/run-tests (cmd)
+  "Execute the given CMD via compilation-start."
+  (compilation-start cmd t))
 
 (defun storax/python-test--current-test-name ()
   (let ((name (python-info-current-defun)))
