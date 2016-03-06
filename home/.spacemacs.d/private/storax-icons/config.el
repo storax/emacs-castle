@@ -52,5 +52,6 @@
 (defconst storax/icon-log (storax/load-vendor-img "log.svg" "  " 'svg))
 (defconst storax/icon-db (storax/load-vendor-img "db.svg" "  " 'svg))
 (defconst storax/icon-sql (storax/load-vendor-img "sql.svg" "  " 'svg))
+(defconst storax/icon-spacemacs (storax/load-vendor-img "spacemacs.svg" "  " 'svg))
 
 ;;; config.el ends here

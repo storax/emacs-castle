@@ -59,7 +59,8 @@
    '("text-mode" text-mode-hook storax/icon-txt)
    '("simple" messages-buffer-mode-hook storax/icon-log)
    '("sql" sql-mode-hook storax/icon-sql)
-   '("elpy-refactor" elpy-refactor-mode-hook storax/icon-python "Refactor ")))
+   '("elpy-refactor" elpy-refactor-mode-hook storax/icon-python "Refactor ")
+   '("core-spacemacs-buffer" spacemacs-buffer-mode-hook storax/icon-spacemacs)))
 
 (storax/add-major-mode-icon-hooks)
 ;; Also apply to current messages buffer

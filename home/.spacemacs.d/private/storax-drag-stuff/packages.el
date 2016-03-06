@@ -14,7 +14,7 @@
 ;;; Code:
 
 (defconst storax-drag-stuff-packages
-  '(drag-stuff, diminish))
+  '(drag-stuff diminish))
 
 (defun storax-drag-stuff/init-drag-stuff ()
   (use-package drag-stuff
