@@ -14,6 +14,7 @@
 ;;; Code:
 
 (defvar storax/tox-history (list) "History of tox arguments.")
+(defvar storax/tox-env-hist nil)
 (defvar storax/pytest-history (list "-vv"))
 (spacemacs/set-leader-keys-for-major-mode 'python-mode
   "tt" 'storax/python-test-tox-pytest-runner

@@ -15,16 +15,43 @@
 
 ;;; Code:
 
+(defun storax/tox-env-list ()
+  "Get a list of tox environments"
+  (let* ((default-directory (projectile-project-root))
+         (versions (split-string (shell-command-to-string "tox -l"))))
+    (append (list "*default*" "ALL") versions)))
+
+(defun storax/tox-read-env ()
+  "Read virtual environment from user input."
+  (let ((envlist (storax/tox-env-list))
+        (prompt "Tox env: "))
+  (if (fboundp 'helm-comp-read)
+      (helm-comp-read
+       prompt envlist
+       :buffer "tox environments"
+       :must-match t
+       :history storax/tox-env-hist
+       :marked-candidates t)
+    (completing-read-multiple prompt envlist nil t nil storax/tox-env-hist))))
+
+(defun storax/tox-construct-env-arg (envs)
+  "Construct the -e arg out of ENVS."
+  (if (member "*default*" envs)
+      ""
+      (concat " -e " (mapconcat 'identity envs ","))))
+
 (defun storax/set-flycheck-error-function ()
   (setq flycheck-display-errors-function #'flycheck-display-error-messages-unless-error-list))
 
-(defun storax/tox (args)
+(defun storax/tox (envs args)
   "Test with tox.
 
 ARGS is a string with arguments for tox."
-  (interactive (list (read-string "Tox arguments: " (car storax/tox-history) 'storax/tox-history)))
+  (interactive (list
+                (storax/tox-read-env)
+                (read-string "Tox arguments: " (car storax/tox-history) 'storax/tox-history)))
   (projectile-with-default-dir (projectile-project-root)
-    (compilation-start (format "tox %s" args) t)))
+    (compilation-start (format "tox%s %s" (storax/tox-construct-env-arg envs) args) t)))
 
 (defun storax/run-tests (cmd &optional name)
   "Execute the given CMD via compilation-start"
@@ -109,25 +136,27 @@ TEST is a single test function or nil to test all."
   (projectile-with-default-dir (projectile-project-root)
     (storax/run-tests (format "tox %s" toxargs)))))
 
-(defun storax/run-tox-pytest (toxargs pytestargs top file module test)
+(defun storax/run-tox-pytest (envs toxargs pytestargs top file module test)
   "Run tox with pytest.
 
+ENVS list of tox environments.
 TOXARGS are the arguments for tox.
 PYTESTARGS are the arguments for pytest.
 TOP is the project root.
 FILE the test file.
 MODULE is the module to test or nil to test all.
 TEST is a single test function or nil to test all."
-  (projectile-with-default-dir (projectile-project-root)
-    (cond
-     (test
-	(storax/run-tests (concat
-			      (format "tox %s -- py.test %s -k \"%s\" %s "
-				      toxargs pytestargs test file))))
-     (module
-      (storax/run-tests (format "tox %s -- py.test %s %s" toxargs pytestargs file)))
-     (t
-      (storax/run-tests (format "tox %s -- py.test %s" toxargs pytestargs))))))
+  (let ((envarg (storax/tox-construct-env-arg envs)))
+    (projectile-with-default-dir (projectile-project-root)
+      (cond
+       (test
+        (storax/run-tests (concat
+                           (format "tox%s %s -- py.test %s -k \"%s\" %s "
+                                   envarg toxargs pytestargs test file))))
+       (module
+        (storax/run-tests (format "tox%s %s -- py.test %s %s" envarg toxargs pytestargs file)))
+       (t
+        (storax/run-tests (format "tox%s %s -- py.test %s" envarg toxargs pytestargs)))))))
 
 (defun storax/python-test-tox-pytest-runner (top file module test)
   "Test the project using tox and pytest.
@@ -138,9 +167,10 @@ FILE the test file.
 MODULE is the module to test or nil to test all.
 TEST is a single test function or nil to test all."
   (interactive (storax/python-test-at-point))
-  (let ((toxargs (read-string "Tox arguments: " (car storax/tox-history) 'storax/tox-history))
+  (let ((envs (storax/tox-read-env))
+        (toxargs (read-string "Tox arguments: " (car storax/tox-history) 'storax/tox-history))
 	(pytestargs (read-string "py.test arguments: " (car storax/pytest-history) 'storax/pytest-history)))
-  (storax/run-tox-pytest toxargs pytestargs top file module test)))
+  (storax/run-tox-pytest envs toxargs pytestargs top file module test)))
 
 (defun storax/python-test-tox-pytest-runner-all (top file module test)
   "Test the project using tox and pytest.
