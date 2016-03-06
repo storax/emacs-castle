@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: #!/usr/bin/env python
-# key: #!
-# group: Header
-# --
-#!/usr/bin/env python

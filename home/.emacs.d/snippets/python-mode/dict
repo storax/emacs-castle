@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: dictexpression
-# key: dicte
-# group : definitions
-# --
-{${1:key}: ${2:value} for $1 in ${3:collection}}$0
