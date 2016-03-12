@@ -66,14 +66,14 @@ values."
                  (region :background "#222222")
                  (scroll-bar :background "#545450" :foreground "#3F3F3F"))))
      vagrant
-     version-control
+     ;; version-control
      xkcd
      yaml
      storax-utils
      storax-unkillable-scratch
      storax-ace-window
      storax-avy
-     storax-desktop
+      storax-desktop
      storax-popup
      storax-dabbrev
      storax-expand-region
@@ -104,8 +104,8 @@ values."
         "Qt" "Requests" "Sphinx" "Vagrant" "emacs"))
      storax-visual-regexp-steroids
      storax-major-mode-icons
-     storax-translate
-     storax-powerline
+     pstorax-translate
+     ;; storax-powerline
      storax-compilation
      storax-semantic
      )
@@ -119,7 +119,7 @@ values."
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
    ;; are declared in a layer which is not a member of
    ;; the list `dotspacemacs-configuration-layers'. (default t)
-   dotspacemacs-delete-orphan-packages t))
+   dotspacemacs-delete-orphan-packages nil))
 
 (defun dotspacemacs/init ()
   "Initialization function.
@@ -275,7 +275,7 @@ values."
    ;; If non nil smooth scrolling (native-scrolling) is enabled. Smooth
    ;; scrolling overrides the default behavior of Emacs which recenters the
    ;; point when it reaches the top or bottom of the screen. (default t)
-   dotspacemacs-smooth-scrolling t
+   dotspacemacs-smooth-scrolling nil
    ;; If non nil line numbers are turned on in all `prog-mode' and `text-mode'
    ;; derivatives. If set to `relative', also turns on relative line numbers.
    ;; (default nil)
