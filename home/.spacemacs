@@ -103,7 +103,8 @@ values."
       '("Bash" "Common Lisp" "Emacs Lisp" "Packer" "Python 2" "Python 3"
         "Qt" "Requests" "Sphinx" "Vagrant" "emacs"))
      storax-visual-regexp-steroids
-     storax-major-mode-icons
+     ;; storax-major-mode-icons
+     storax-mode-icons
      pstorax-translate
      ;; storax-powerline
      storax-compilation
