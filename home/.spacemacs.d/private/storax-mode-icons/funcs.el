@@ -305,7 +305,7 @@ ICON-SPEC should be a specification from `mode-icons'."
        ;; Use `compose-region' because it allows clicable text.
        (with-temp-buffer
          (if (stringp mode)
-             (insert mode)
+             (insert "  ") ;(insert mode)
            (insert (or (and (integerp (nth 1 icon-spec))
                             (make-string 1 (nth 1 icon-spec)))
                        (nth 1 icon-spec))))
@@ -677,5 +677,14 @@ STRING is the string to modify, or if absent, the value from `mode-line-eol-desc
     (mode-icons-set-minor-mode-icon-undo)
     (mode-icons-major-mode-icons-undo)
     (mode-icons-fix)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Font Icons
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun storax/font-icon (name)
+  "Return a character with the icon.
+
+NAME should be a name from `storax/font-icons'."
+  (cadr (assoc name font-icons)))
 
 ;;; funcs.el ends here
