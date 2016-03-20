@@ -28,6 +28,19 @@
           org-habit
           org-id
           org-info))
+  (setq org-startup-indented t)
+  (setq org-cycle-separator-lines 0)
+  (setq org-blank-before-new-entry (quote ((heading)
+                                           (plain-list-item . auto))))
+  (setq org-enforce-todo-dependencies t)
+  (setq org-reverse-note-order nil)
+  (setq org-yank-adjusted-subtrees t)
+  (setq org-deadline-warning-days 30)
+  (setq org-src-window-setup 'current-window)
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer t)
+  (setq org-log-state-notes-insert-after-drawers nil)
+  (setq org-clock-sound (concat (file-name-directory load-file-name) "warning.wav"))
   (setq org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
           (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING")))
@@ -108,11 +121,11 @@
                                  (if storax/org-hide-scheduled-and-waiting-next-tasks
                                      ""
                                    " (including WAITING and SCHEDULED tasks)")))
-                        (org-agenda-skip-function 'bh/skip-projects-and-habits-and-single-tasks)
+                        (org-agenda-skip-function 'storax/org-skip-projects-and-habits-and-single-tasks)
                         (org-tags-match-list-sublevels t)
-                        (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
-                        (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
-                        (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
+                        (org-agenda-todo-ignore-scheduled storax/org-hide-scheduled-and-waiting-next-tasks)
+                        (org-agenda-todo-ignore-deadlines storax/org-hide-scheduled-and-waiting-next-tasks)
+                        (org-agenda-todo-ignore-with-date storax/org-hide-scheduled-and-waiting-next-tasks)
                         (org-agenda-sorting-strategy
                          '(todo-state-down effort-up category-keep))))
             (tags-todo "-REFILE-CANCELLED-WAITING-HOLD/!"
@@ -121,10 +134,10 @@
                                  (if storax/org-hide-scheduled-and-waiting-next-tasks
                                      ""
                                    " (including WAITING and SCHEDULED tasks)")))
-                        (org-agenda-skip-function 'bh/skip-non-project-tasks)
-                        (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
-                        (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
-                        (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
+                        (org-agenda-skip-function 'storax/org-skip-non-project-tasks)
+                        (org-agenda-todo-ignore-scheduled storax/org-hide-scheduled-and-waiting-next-tasks)
+                        (org-agenda-todo-ignore-deadlines storax/org-hide-scheduled-and-waiting-next-tasks)
+                        (org-agenda-todo-ignore-with-date storax/org-hide-scheduled-and-waiting-next-tasks)
                         (org-agenda-sorting-strategy
                          '(category-keep))))
             (tags-todo "-REFILE-CANCELLED-WAITING-HOLD/!"
@@ -133,10 +146,10 @@
                                  (if storax/org-hide-scheduled-and-waiting-next-tasks
                                      ""
                                    " (including WAITING and SCHEDULED tasks)")))
-                        (org-agenda-skip-function 'bh/skip-project-tasks)
-                        (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
-                        (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
-                        (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
+                        (org-agenda-skip-function 'storax/org-skip-project-tasks)
+                        (org-agenda-todo-ignore-scheduled storax/org-hide-scheduled-and-waiting-next-tasks)
+                        (org-agenda-todo-ignore-deadlines storax/org-hide-scheduled-and-waiting-next-tasks)
+                        (org-agenda-todo-ignore-with-date storax/org-hide-scheduled-and-waiting-next-tasks)
                         (org-agenda-sorting-strategy
                          '(category-keep))))
             (tags-todo "-CANCELLED+WAITING|HOLD/!"
@@ -145,10 +158,10 @@
                                  (if storax/org-hide-scheduled-and-waiting-next-tasks
                                      ""
                                    " (including WAITING and SCHEDULED tasks)")))
-                        (org-agenda-skip-function 'bh/skip-non-tasks)
+                        (org-agenda-skip-function 'storax/org-skip-non-tasks)
                         (org-tags-match-list-sublevels nil)
-                        (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
-                        (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)))
+                        (org-agenda-todo-ignore-scheduled storax/org-hide-scheduled-and-waiting-next-tasks)
+                        (org-agenda-todo-ignore-deadlines storax/org-hide-scheduled-and-waiting-next-tasks)))
             (tags "-REFILE/"
                   ((org-agenda-overriding-header "Tasks to Archive")
                    (org-agenda-skip-function 'storax/org-skip-non-archivable-tasks)
@@ -214,13 +227,13 @@
   (setq org-fast-tag-selection-single-key nil)
   ;; For tag searches ignore tasks with scheduled and deadline dates
   (setq org-agenda-tags-todo-honor-ignore-options t)
-  (setq org-agenda-span 'day)
+  ;(setq org-agenda-span 'day)
   (setq org-stuck-projects '("" nil nil ""))
   (setq org-archive-mark-done nil)
   (setq org-archive-location "%s_archive::* Archived Tasks")
   (setq org-alphabetical-lists t)
-  (setq org-ditaa-jar-path "~/git/org-mode/contrib/scripts/ditaa.jar")
-  (setq org-plantuml-jar-path "~/java/plantuml.jar")
+  ;(setq org-ditaa-jar-path "~/git/org-mode/contrib/scripts/ditaa.jar")
+  ;(setq org-plantuml-jar-path "~/java/plantuml.jar")
 
   ;;TODO(setq org-ditaa-jar-path "~/git/org-mode/contrib/scripts/ditaa.jar")
   ;;TODO(setq org-plantuml-jar-path "~/java/plantuml.jar")
@@ -298,7 +311,54 @@
         '(("html" . "")
           ("was-html" . "<?xml version=\"1.0\" encoding=\"%s\"?>")
           ("php" . "<?php echo \"<?xml version=\\\"1.0\\\" encoding=\\\"%s\\\" ?>\"; ?>")))
-  (setq org-export-allow-BIND t))
+  (setq org-export-allow-BIND t)
+  ;; Keep tasks with dates on the global todo lists
+  (setq org-agenda-todo-ignore-with-date nil)
+  ;; Keep tasks with deadlines on the global todo lists
+  (setq org-agenda-todo-ignore-deadlines nil)
+  ;; Keep tasks with scheduled dates on the global todo lists
+  (setq org-agenda-todo-ignore-scheduled nil)
+  ;; Keep tasks with timestamps on the global todo lists
+  (setq org-agenda-todo-ignore-timestamp nil)
+  ;; Remove completed deadline tasks from the agenda view
+  (setq org-agenda-skip-deadline-if-done t)
+  ;; Remove completed scheduled tasks from the agenda view
+  (setq org-agenda-skip-scheduled-if-done t)
+  ;; Remove completed items from search results
+  (setq org-agenda-skip-timestamp-if-done t)
+  (setq org-agenda-include-diary nil)
+  (setq org-agenda-diary-file "~/Documents/org/diary.org")
+  (setq org-agenda-insert-diary-extract-time t)
+  ;; Include agenda archive files when searching for things
+  (setq org-agenda-text-search-extra-files '(agenda-archives))
+  ;; Show all future entries for repeating tasks
+  (setq org-agenda-repeating-timestamp-show-all t)
+  ;; Show all agenda dates - even if they are empty
+  (setq org-agenda-show-all-dates t)
+  ;; Sorting order for tasks on the agenda
+  (setq org-agenda-sorting-strategy
+        '((agenda habit-down time-up user-defined-up effort-up category-keep)
+          (todo category-up effort-up)
+          (tags category-up effort-up)
+          (search category-up)))
+  ;; Start the weekly agenda on Monday
+  (setq org-agenda-start-on-weekday 1)
+  ;; Enable display of the time grid so we can see the marker for the current time
+  (setq org-agenda-time-grid '((daily today remove-match)
+                               #("----------------" 0 16 (org-heading t))
+                               (0900 1100 1300 1500 1700)))
+  ;; Display tags farther right
+  (setq org-agenda-tags-column -102)
+  (setq org-agenda-cmp-user-defined 'storax/org-agenda-sort)
+  ;; position the habit graph on the agenda to the right of the default
+  (setq org-habit-graph-column 50)
+  (setq org-return-follows-link t)
+  (setq org-read-date-prefer-future 'time)
+  (setq org-cycle-include-plain-lists t)
+  (setq org-time-clocksum-format
+        '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
+
+)
 
 (defun storax-org/init-org ()
   (use-package org
@@ -333,7 +393,14 @@
       (storax-org/setup-org)
       (add-hook 'org-clock-out-hook 'org-clock-remove-empty-clock-drawer 'append)
       (add-hook 'org-clock-out-hook 'storax/org-clock-out-maybe 'append)
-      (add-hook 'org-babel-after-execute-hook 'storax/org-display-inline-images 'append))))
-
+      (add-hook 'org-babel-after-execute-hook 'storax/org-display-inline-images 'append)
+      ;; Rebuild the reminders everytime the agenda is displayed
+      (add-hook 'org-finalize-agenda-hook 'storax/org-agenda-to-appt 'append)
+      (add-hook 'after-init-hook 'storax/org-agenda-to-appt)
+      (add-hook 'after-init-hook (lambda () (load-file (concat (file-name-directory load-file-name) "appt.el"))))
+      (appt-activate t)
+      (run-at-time "24:01" nil 'storax/org-agenda-to-appt)
+      (run-at-time "06:00" 86400 '(lambda () (setq org-habit-show-habits t)))
+      (run-at-time "00:59" 3600 'org-save-all-org-buffers))))
 
 ;;; packages.el ends here

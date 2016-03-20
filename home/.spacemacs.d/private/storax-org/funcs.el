@@ -498,4 +498,98 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
   (let ((org-html-head-extra))
     (org-publish-current-project force)))
 
+;; Erase all reminders and rebuilt reminders for today from the agenda
+(defun storax/org-agenda-to-appt ()
+  (interactive)
+  (setq appt-time-msg-list nil)
+  (org-agenda-to-appt))
+
+(defun storax/org-agenda-sort (a b)
+  "Sorting strategy for agenda items A and B.
+Late deadlines first, then scheduled, then non-late deadlines"
+  (let (result num-a num-b)
+    (cond
+     ; time specific items are already sorted first by org-agenda-sorting-strategy
+
+     ; non-deadline and non-scheduled items next
+     ((storax/org-agenda-sort-test 'storax/org-is-not-scheduled-or-deadline a b))
+
+     ; deadlines for today next
+     ((storax/org-agenda-sort-test 'storax/org-is-due-deadline a b))
+
+     ; late deadlines next
+     ((storax/org-agenda-sort-test-num 'storax/org-is-late-deadline '> a b))
+
+     ; scheduled items for today next
+     ((storax/org-agenda-sort-test 'storax/org-is-scheduled-today a b))
+
+     ; late scheduled items next
+     ((storax/org-agenda-sort-test-num 'storax/org-is-scheduled-late '> a b))
+
+     ; pending deadlines last
+     ((storax/org-agenda-sort-test-num 'storax/org-is-pending-deadline '< a b))
+
+     ; finally default to unsorted
+     (t (setq result nil)))
+    result))
+
+(defmacro storax/org-agenda-sort-test (fn a b)
+  "Test for agenda sort."
+  `(cond
+    ; if both match leave them unsorted
+    ((and (apply ,fn (list ,a))
+          (apply ,fn (list ,b)))
+     (setq result nil))
+    ; if a matches put a first
+    ((apply ,fn (list ,a))
+     (setq result -1))
+    ; otherwise if b matches put b first
+    ((apply ,fn (list ,b))
+     (setq result 1))
+    ; if none match leave them unsorted
+    (t nil)))
+
+(defmacro storax/org-agenda-sort-test-num (fn compfn a b)
+  `(cond
+    ((apply ,fn (list ,a))
+     (setq num-a (string-to-number (match-string 1 ,a)))
+     (if (apply ,fn (list ,b))
+         (progn
+           (setq num-b (string-to-number (match-string 1 ,b)))
+           (setq result (if (apply ,compfn (list num-a num-b))
+                            -1
+                          1)))
+       (setq result -1)))
+    ((apply ,fn (list ,b))
+     (setq result 1))
+    (t nil)))
+
+(defun storax/org-is-not-scheduled-or-deadline (date-str)
+  (and (not (storax/org-is-deadline date-str))
+       (not (storax/org-is-scheduled date-str))))
+
+(defun storax/org-is-due-deadline (date-str)
+  (string-match "Deadline:" date-str))
+
+(defun storax/org-is-late-deadline (date-str)
+  (string-match "\\([0-9]*\\) d\. ago:" date-str))
+
+(defun storax/org-is-pending-deadline (date-str)
+  (string-match "In \\([^-]*\\)d\.:" date-str))
+
+(defun storax/org-is-deadline (date-str)
+  (or (storax/org-is-due-deadline date-str)
+      (storax/org-is-late-deadline date-str)
+      (storax/org-is-pending-deadline date-str)))
+
+(defun storax/org-is-scheduled (date-str)
+  (or (storax/org-is-scheduled-today date-str)
+      (storax/org-is-scheduled-late date-str)))
+
+(defun storax/org-is-scheduled-today (date-str)
+  (string-match "Scheduled:" date-str))
+
+(defun storax/org-is-scheduled-late (date-str)
+  (string-match "Sched\.\\(.*\\)x:" date-str))
+
 ;;; funcs.el ends here
