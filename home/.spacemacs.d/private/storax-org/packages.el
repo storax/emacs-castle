@@ -356,9 +356,7 @@
   (setq org-read-date-prefer-future 'time)
   (setq org-cycle-include-plain-lists t)
   (setq org-time-clocksum-format
-        '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
-
-)
+        '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t)))
 
 (defun storax-org/init-org ()
   (use-package org
