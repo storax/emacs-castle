@@ -379,6 +379,7 @@
       (spacemacs/set-leader-keys "opp" 'storax/org-save-then-publish)
       (spacemacs/set-leader-keys "org" 'org-clock-goto)
       (spacemacs/set-leader-keys "orp" 'storax/org-punch-in)
+      (spacemacs/set-leader-keys "ork" 'storax/org-punch-out)
       (spacemacs/set-leader-keys "ori" 'org-clock-in)
       (spacemacs/set-leader-keys "oro" 'org-clock-out)
       (spacemacs/set-leader-keys "ovi" 'org-toggle-inline-images)
