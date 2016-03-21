@@ -265,15 +265,13 @@
   (setq org-html-inline-images t)
   ;; Do not use sub or superscripts - I currently don't need this functionality in my documents
   (setq org-export-with-sub-superscripts nil)
-  ;; Use org.css from the norang website for export document stylesheets
-  (setq org-html-head-extra "<link rel=\"stylesheet\" href=\"http://doc.norang.ca/org.css\" type=\"text/css\" />")
-  (setq org-html-head-include-default-style nil)
   ;; Do not generate internal css formatting for HTML exports
   (setq org-export-htmlize-output-type (quote css))
   ;; Export with LaTeX fragments
   (setq org-export-with-LaTeX-fragments t)
   ;; Increase default number of headings to export
-  (setq org-export-headline-levels 6)
+  (setq org-export-headline-levels 6
+        org-export-with-tags nil)
   (setq org-publish-project-alist
         `(;; Miscellaneous pages for other websites
           ;; org are the org-files that generate the content
@@ -294,7 +292,6 @@
 <script type=\"text/javascript\" src=\"styles/readtheorg/js/readtheorg.js\"></script>"
            :publishing-function org-html-publish-to-html
            :style-include-default nil
-           :tags nil
            :author-info t
            :creator-info t)
           ("org-extra"
