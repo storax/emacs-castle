@@ -40,7 +40,7 @@
   (setq org-log-done 'time)
   (setq org-log-into-drawer t)
   (setq org-log-state-notes-insert-after-drawers nil)
-  (setq org-clock-sound (concat (file-name-directory load-file-name) "warning.wav"))
+  (setq org-clock-sound storax-org-warning-sound)
   (setq org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
           (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING")))

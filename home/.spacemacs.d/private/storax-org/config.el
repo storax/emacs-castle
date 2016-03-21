@@ -20,10 +20,12 @@ Use `org-id-get-create' to create a new id for some task.")
 (defvar storax/org-source-link-file-hist nil
   "History for files to insert links in.")
 
+(defvar storax-org-layer-dir (file-name-directory load-file-name))
+
 (defvar storax-org-template-dir
   (mapconcat
    'file-name-as-directory
-   (list (file-name-directory load-file-name) "templates")
+   (list storax-org-layer-dir "templates")
    nil))
 
 (defvar storax-org-rtd-theme-path
@@ -31,4 +33,7 @@ Use `org-id-get-create' to create a new id for some task.")
    'file-name-as-directory
    (list storax-org-template-dir "rtd")
    nil))
+
+(defvar storax-org-warning-sound
+  (concat storax-org-layer-dir "warning.wav"))
 ;;; config.el ends here
