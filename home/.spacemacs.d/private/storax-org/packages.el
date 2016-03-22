@@ -227,13 +227,13 @@
   (setq org-fast-tag-selection-single-key nil)
   ;; For tag searches ignore tasks with scheduled and deadline dates
   (setq org-agenda-tags-todo-honor-ignore-options t)
-  ;(setq org-agenda-span 'day)
+  ;;(setq org-agenda-span 'day)
   (setq org-stuck-projects '("" nil nil ""))
   (setq org-archive-mark-done nil)
   (setq org-archive-location "%s_archive::* Archived Tasks")
   (setq org-alphabetical-lists t)
-  ;(setq org-ditaa-jar-path "~/git/org-mode/contrib/scripts/ditaa.jar")
-  ;(setq org-plantuml-jar-path "~/java/plantuml.jar")
+  ;;(setq org-ditaa-jar-path "~/git/org-mode/contrib/scripts/ditaa.jar")
+  ;;(setq org-plantuml-jar-path "~/java/plantuml.jar")
 
   ;;TODO(setq org-ditaa-jar-path "~/git/org-mode/contrib/scripts/ditaa.jar")
   ;;TODO(setq org-plantuml-jar-path "~/java/plantuml.jar")
