@@ -819,7 +819,7 @@ The following variables control appointment notification:
                            (when appt-visible
                              ;; WAS: cadar, not cdar
                              (message "%s" (cdar appt-time-msg-list))) ; Msg.
-                           (when appt-audible (beep 1)))))
+                           (when appt-audible (org-clock-play-sound)))))
                   (when appt-display-mode-line
                     (setq appt-mode-string
                           (concat "Appointment in " min-to-app " min. "
@@ -1302,14 +1302,14 @@ Prefix arg makes the entry nonmarking."
   (when (fboundp 'show-a-frame-on) (show-a-frame-on appt-buffer-name))
   (save-excursion (set-buffer appt-buffer-name) (reminders-mode))
   (when appt-msg                        ; Called with explicit msg arg.
-    (when appt-audible (beep 1))
+    (when appt-audible (org-clock-play-sound))
     (message (if (zerop min-to-app)
                  (concat "NOW:   " appt-msg)
                (concat min-to-app " minutes from now-----" appt-msg))))
   (unless appt-time-msg-list
-    (when appt-audible (beep 1))
+    (when appt-audible (org-clock-play-sound))
     (message "No appointments.")))
-      
+
 ;; (make-local-hook 'temp-buffer-show-hook)
 (remove-hook 'temp-buffer-show-hook 'help-mode-finish 'local-only)
 
