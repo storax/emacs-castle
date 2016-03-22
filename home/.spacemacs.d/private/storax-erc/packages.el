@@ -13,19 +13,15 @@
 
 ;;; Code:
 
-(configuration-layer/declare-layer 'storax-secret)
-
 (defconst storax-erc-packages
   '(erc))
 
-
 (defun storax-erc/post-init-erc ()
   (use-package erc
+    :init
+    (spacemacs/set-leader-keys "aig" 'storax-erc/erc-gitter)
     :config
-    (storax/load-secrets)
-    (setq erc-nick gitter-username
-          erc-password gitter-token
-          erc-server "irc.gitter.im"
+    (setq erc-server "irc.gitter.im"
           erc-modules
           '(autojoin
             button
@@ -45,7 +41,6 @@
             pcomplete
             readonly
             ring
-            services
             stamp
             track
             youtube)
