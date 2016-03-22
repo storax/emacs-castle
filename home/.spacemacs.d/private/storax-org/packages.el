@@ -402,6 +402,7 @@
       (appt-activate t)
       (run-at-time "24:01" nil 'storax/org-agenda-to-appt)
       (run-at-time "06:00" 86400 '(lambda () (setq org-habit-show-habits t)))
-      (run-at-time "00:59" 3600 'org-save-all-org-buffers))))
+      (run-at-time "00:59" 3600 'org-save-all-org-buffers)
+      (org-babel-lob-ingest storax-org-lob-file))))
 
 ;;; packages.el ends here

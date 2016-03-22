@@ -36,4 +36,7 @@ Use `org-id-get-create' to create a new id for some task.")
 
 (defvar storax-org-warning-sound
   (concat storax-org-layer-dir "warning.wav"))
+
+(defvar storax-org-lob-file
+  (concat storax-org-layer-dir "lob.org"))
 ;;; config.el ends here
