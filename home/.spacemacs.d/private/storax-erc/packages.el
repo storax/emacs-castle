@@ -45,8 +45,7 @@
             track
             youtube)
           erc-autojoin-channels-alist
-          '(("irc.gitter.im" . ("signalpiller"
-                                "magit/magit"
+          '(("irc.gitter.im" . ("magit/magit"
                                 "syl20bnr/spacemacs"))))))
 
 
