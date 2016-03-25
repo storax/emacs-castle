@@ -13,7 +13,7 @@
 
 ;;; Code:
 
-(defvar storax/org-organization-task-id "74f0b137-8c5e-4486-ab25-509343ff2dc7"
+(defvar storax/org-organization-task-id "6a726688-4bf5-4d7d-b00c-83d766c221a3"
   "Id of the default clocking task that has to live in some file.
 Use `org-id-get-create' to create a new id for some task.")
 (defvar storax/org-hide-scheduled-and-waiting-next-tasks t)
