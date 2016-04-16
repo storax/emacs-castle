@@ -14,8 +14,11 @@
 ;; Credits to Jorgen Schaefer's elpy for the find test functions.
 
 ;;; Code:
-
+(require 'ansi-color)
+(require 'comint)
 (require 'gud)
+(require 'python)
+
 (defvar storax-pdb-print-hist nil "History for pdb print commands.")
 
 (defun storax-strip-whitespace (string)
@@ -215,6 +218,69 @@ TEST is a single test function or nil to test all."
   (let ((toxargs (car storax/tox-history))
 	(pytestargs (car storax/pytest-history)))
   (storax/run-tox-pytest toxargs pytestargs top file module test)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; PDB stuff
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar storax-pdb-output-filter-in-progress nil)
+(defvar storax-pdb-output-filter-buffer nil)
+(defvar storax-pdb-input-regexp "^[(<]*[Ii]?[Pp]db[>)]+ ")
+
+(defun storax/pdb-output-filter (string)
+  "Filter used in `storax/pdb-call-no-output' to grab output.
+STRING is the output received to this point from the process.
+This filter saves received output from the process in
+`storax-pdb-output-filter-buffer' and stops receiving it after
+detecting a prompt at the end of the buffer."
+  (setq
+   string (ansi-color-filter-apply string)
+   storax-pdb-output-filter-buffer
+   (concat storax-pdb-output-filter-buffer string))
+  (when (string-match
+         ;; XXX: It seems on OSX an extra carriage return is attached
+         ;; at the end of output, this handles that too.
+         (concat
+          "\r?\n"
+          ;; Remove initial caret from calculated regexp
+          (replace-regexp-in-string
+           (rx string-start ?^) ""
+           storax-pdb-input-regexp)
+          "$")
+         storax-pdb-output-filter-buffer)
+    ;; Output ends when `storax-pdb-output-filter-buffer' contains
+    ;; the prompt attached at the end of it.
+    (setq storax-pdb-output-filter-in-progress nil
+          storax-pdb-output-filter-buffer
+          (substring storax-pdb-output-filter-buffer
+                     0 (match-beginning 0)))
+    (when (string-match
+           "^"
+           storax-pdb-output-filter-buffer)
+      ;; Some shells, like IPython might append a prompt before the
+      ;; output, clean that.
+      (setq storax-pdb-output-filter-buffer
+            (substring storax-pdb-output-filter-buffer (match-end 0)))))
+  (if storax-pdb-output-filter-in-progress
+      ""
+    "(Pdb) "))
+
+(defun storax/pdb-call-no-output (string)
+  "Send STRING to PROCESS and inhibit ouput.
+Return the output."
+  (let ((comint-preoutput-filter-functions
+         '(storax/pdb-output-filter))
+        (storax-pdb-output-filter-in-progress t)
+        (inhibit-quit t))
+    (gud-call string)
+    (while storax-pdb-output-filter-in-progress
+      ;; `storax/pdb-output-filter' takes care of setting
+      ;; `storax/pdb--output-filter-in-progress' to NIL after it
+      ;; detects end of output.
+      (accept-process-output (get-buffer-process gud-comint-buffer)))
+    (prog1
+        storax-pdb-output-filter-buffer
+      (setq storax-pdb-output-filter-buffer nil))))
 
 (defun storax/pdb-print-symbol ()
   "Print the current symbol at point."
