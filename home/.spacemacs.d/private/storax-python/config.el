@@ -13,7 +13,6 @@
 
 ;;; Code:
 
-(defvar storax-pdb-print-hist nil "History for pdb print commands.")
 (defvar storax/tox-history (list) "History of tox arguments.")
 (defvar storax/tox-env-hist nil)
 (defvar storax/pytest-history (list "-vv"))
@@ -32,16 +31,16 @@
   "dd" 'gud-down
   "dU" 'gud-until
   "df" 'gud-finish
-  "dps" 'storax/gud-print-symbol
-  "dpl" 'storax/gud-print-line
-  "dpr" 'storax/gud-print-region
-  "dpp SPC" 'storax/gud-pprint-prompt
-  "dpps" 'storax/gud-pprint-symbol
-  "dppl" 'storax/gud-pprint-line
-  "dppr" 'storax/gud-pprint-region
-  "dp SPC" 'storax/gud-print-prompt
-  "del" 'storax/gud-execute-line
-  "der" 'storax/gud-execute-region
-  "de SPC" 'storax/gud-execute-prompt)
+  "dps" 'storax/pdb-print-symbol
+  "dpl" 'storax/pdb-print-line
+  "dpr" 'storax/pdb-print-region
+  "dpp SPC" 'storax/pdb-pprint-prompt
+  "dpps" 'storax/pdb-pprint-symbol
+  "dppl" 'storax/pdb-pprint-line
+  "dppr" 'storax/pdb-pprint-region
+  "dp SPC" 'storax/pdb-print-prompt
+  "del" 'storax/pdb-execute-line
+  "der" 'storax/pdb-execute-region
+  "de SPC" 'storax/pdb-execute-prompt)
 
 ;;; config.el ends here

@@ -16,6 +16,7 @@
 ;;; Code:
 
 (require 'gud)
+(defvar storax-pdb-print-hist nil "History for pdb print commands.")
 
 (defun storax-strip-whitespace (string)
   "Return STRING stripped of all whitespace."
@@ -215,17 +216,17 @@ TEST is a single test function or nil to test all."
 	(pytestargs (car storax/pytest-history)))
   (storax/run-tox-pytest toxargs pytestargs top file module test)))
 
-(defun storax/gud-print-symbol ()
+(defun storax/pdb-print-symbol ()
   "Print the current symbol at point."
   (interactive)
   (gud-call (format "p %s" (symbol-at-point))))
 
-(defun storax/gud-pprint-symbol ()
+(defun storax/pdb-pprint-symbol ()
   "Pretty print the current symbol at point."
   (interactive)
   (gud-call (format "pp %s" (symbol-at-point))))
 
-(defun storax/gud-print-line ()
+(defun storax/pdb-print-line ()
   "Print the current line without preceding whitespace."
   (interactive)
   (gud-call
@@ -233,7 +234,7 @@ TEST is a single test function or nil to test all."
            (storax-strip-whitespace
             (buffer-substring (line-beginning-position) (line-end-position))))))
 
-(defun storax/gud-pprint-line ()
+(defun storax/pdb-pprint-line ()
   "Pretty print the current line without preceding whitespace."
   (interactive)
   (gud-call
@@ -241,7 +242,7 @@ TEST is a single test function or nil to test all."
            (storax-strip-whitespace
             (buffer-substring (line-beginning-position) (line-end-position))))))
 
-(defun storax/gud-execute-line ()
+(defun storax/pdb-execute-line ()
   "Execute the current line without preceding whitespace."
   (interactive)
   (gud-call
@@ -249,7 +250,7 @@ TEST is a single test function or nil to test all."
            (storax-strip-whitespace
             (buffer-substring (line-beginning-position) (line-end-position))))))
 
-(defun storax/gud-print-region ()
+(defun storax/pdb-print-region ()
   "Print the current region without preceding whitespace."
   (interactive)
   (if (region-active-p)
@@ -257,9 +258,9 @@ TEST is a single test function or nil to test all."
        (format "p %s"
                (storax-strip-whitespace
                 (buffer-substring (region-beginning) (region-end)))))
-    (storax/gud-print-line)))
+    (storax/pdb-print-line)))
 
-(defun storax/gud-pprint-region ()
+(defun storax/pdb-pprint-region ()
   "Pretty print the current region without preceding whitespace."
   (interactive)
   (if (region-active-p)
@@ -267,9 +268,9 @@ TEST is a single test function or nil to test all."
        (format "pp %s"
                (storax-strip-whitespace
                 (buffer-substring (region-beginning) (region-end)))))
-    (storax/gud-print-line)))
+    (storax/pdb-print-line)))
 
-(defun storax/gud-execute-region ()
+(defun storax/pdb-execute-region ()
   "Execute the current region without preceding whitespace."
   (interactive)
   (if (region-active-p)
@@ -277,23 +278,23 @@ TEST is a single test function or nil to test all."
        (format "!%s"
                (storax-strip-whitespace
                 (buffer-substring (region-beginning) (region-end)))))
-    (storax/gud-execute-line)))
+    (storax/pdb-execute-line)))
 
-(defun storax/gud-print-prompt ()
+(defun storax/pdb-print-prompt ()
   "Prompt user what to print."
   (interactive)
   (let ((user-input
          (read-string "Print: " nil storax-pdb-print-hist (symbol-at-point))))
   (gud-call (format "p %s" user-input))))
 
-(defun storax/gud-pprint-prompt ()
+(defun storax/pdb-pprint-prompt ()
   "Prompt user what to pretty print."
   (interactive)
   (let ((user-input
          (read-string "Pretty Print: " nil storax-pdb-print-hist (symbol-at-point))))
     (gud-call (format "pp %s" user-input))))
 
-(defun storax/gud-execute-prompt ()
+(defun storax/pdb-execute-prompt ()
   "Prompt user what to execute."
   (interactive)
   (let ((user-input
@@ -301,7 +302,7 @@ TEST is a single test function or nil to test all."
     (gud-call (format "!%s" user-input))))
 
 (defun storax/pdb (command-line)
-  "Run pdb on program FILE in buffer `*gud-FILE*'.
+  "Run pdb on program COMMAND-LINE in buffer `*gud-FILE*'.
 The directory containing FILE becomes the initial working directory
 and source-file directory for your debugger."
   (interactive
@@ -319,11 +320,11 @@ and source-file directory for your debugger."
   (gud-def gud-up     "up"           "<" "Up one stack frame.")
   (gud-def gud-down   "down"         ">" "Down one stack frame.")
   (gud-def gud-until   "until"         "\C-w" "Execute until higher line number.")
-  (gud-def gud-print-prompt (storax/gud-print-prompt) "\C-p" "Print prompt.")
+  (gud-def gud-print-prompt (storax/pdb-print-prompt) "\C-p" "Print prompt.")
   (gud-def gud-jump "jump %l"        "\C-j" "Set execution address to current line.")
-  (gud-def gud-execute-prompt (storax/gud-execute-prompt) "\C-e" "Execute Python statement.")
+  (gud-def gud-execute-prompt (storax/pdb-execute-prompt) "\C-e" "Execute Python statement.")
   ;; (setq comint-prompt-regexp "^(.*pdb[+]?) *")
-  (setq comint-prompt-regexp "^(Pdb) *")
+  (setq comint-prompt-regexp storax-pdb-input-regexp)
   (setq paragraph-start comint-prompt-regexp)
   (run-hooks 'pdb-mode-hook))
 
