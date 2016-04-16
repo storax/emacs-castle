@@ -14,10 +14,13 @@
 ;;; Code:
 
 (defconst storax-org-packages
-  '(org orgbox))
+  '(org orgbox ox-rst))
 
 (defun storax-org/init-orgbox ()
   (use-package orgbox))
+
+(defun storax-org/init-ox-rst ()
+  (use-package ox-rst))
 
 (defun storax-org/setup-org ()
   (setq org-modules
@@ -28,6 +31,8 @@
           org-habit
           org-id
           org-info))
+  (setq org-hide-emphasis-markers t
+        org-pretty-entities t)
   (setq org-startup-indented t)
   (setq org-cycle-separator-lines 0)
   (setq org-blank-before-new-entry (quote ((heading)

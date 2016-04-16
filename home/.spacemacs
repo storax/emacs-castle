@@ -105,7 +105,7 @@ values."
      storax-visual-regexp-steroids
      ;; storax-major-mode-icons
      storax-mode-icons
-     pstorax-translate
+     storax-translate
      ;; storax-powerline
      storax-compilation
      storax-semantic

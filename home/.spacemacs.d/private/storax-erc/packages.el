@@ -46,7 +46,9 @@
             youtube)
           erc-autojoin-channels-alist
           '(("irc.gitter.im" . ("magit/magit"
-                                "syl20bnr/spacemacs"))))))
+                                "syl20bnr/spacemacs"
+                                "signalpillar/chat-with-storax"))
+            ("irc.freenode.net" . ("#bitches"))))))
 
 
 ;;; packages.el ends here
