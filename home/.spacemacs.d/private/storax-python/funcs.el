@@ -15,6 +15,14 @@
 
 ;;; Code:
 
+(require 'gud)
+
+(defun storax-strip-whitespace (string)
+  "Return STRING stripped of all whitespace."
+  (while (string-match "^[\r\n\t ]+" string)
+    (setq string (replace-match "" t t string)))
+  string)
+
 (defun storax/tox-env-list ()
   "Get a list of tox environments"
   (let* ((default-directory (projectile-project-root))
@@ -206,5 +214,117 @@ TEST is a single test function or nil to test all."
   (let ((toxargs (car storax/tox-history))
 	(pytestargs (car storax/pytest-history)))
   (storax/run-tox-pytest toxargs pytestargs top file module test)))
+
+(defun storax/gud-print-symbol ()
+  "Print the current symbol at point."
+  (interactive)
+  (gud-call (format "p %s" (symbol-at-point))))
+
+(defun storax/gud-pprint-symbol ()
+  "Pretty print the current symbol at point."
+  (interactive)
+  (gud-call (format "pp %s" (symbol-at-point))))
+
+(defun storax/gud-print-line ()
+  "Print the current line without preceding whitespace."
+  (interactive)
+  (gud-call
+   (format "p %s"
+           (storax-strip-whitespace
+            (buffer-substring (line-beginning-position) (line-end-position))))))
+
+(defun storax/gud-pprint-line ()
+  "Pretty print the current line without preceding whitespace."
+  (interactive)
+  (gud-call
+   (format "pp %s"
+           (storax-strip-whitespace
+            (buffer-substring (line-beginning-position) (line-end-position))))))
+
+(defun storax/gud-execute-line ()
+  "Execute the current line without preceding whitespace."
+  (interactive)
+  (gud-call
+   (format "!%s"
+           (storax-strip-whitespace
+            (buffer-substring (line-beginning-position) (line-end-position))))))
+
+(defun storax/gud-print-region ()
+  "Print the current region without preceding whitespace."
+  (interactive)
+  (if (region-active-p)
+      (gud-call
+       (format "p %s"
+               (storax-strip-whitespace
+                (buffer-substring (region-beginning) (region-end)))))
+    (storax/gud-print-line)))
+
+(defun storax/gud-pprint-region ()
+  "Pretty print the current region without preceding whitespace."
+  (interactive)
+  (if (region-active-p)
+      (gud-call
+       (format "pp %s"
+               (storax-strip-whitespace
+                (buffer-substring (region-beginning) (region-end)))))
+    (storax/gud-print-line)))
+
+(defun storax/gud-execute-region ()
+  "Execute the current region without preceding whitespace."
+  (interactive)
+  (if (region-active-p)
+      (gud-call
+       (format "!%s"
+               (storax-strip-whitespace
+                (buffer-substring (region-beginning) (region-end)))))
+    (storax/gud-execute-line)))
+
+(defun storax/gud-print-prompt ()
+  "Prompt user what to print."
+  (interactive)
+  (let ((user-input
+         (read-string "Print: " nil storax-pdb-print-hist (symbol-at-point))))
+  (gud-call (format "p %s" user-input))))
+
+(defun storax/gud-pprint-prompt ()
+  "Prompt user what to pretty print."
+  (interactive)
+  (let ((user-input
+         (read-string "Pretty Print: " nil storax-pdb-print-hist (symbol-at-point))))
+    (gud-call (format "pp %s" user-input))))
+
+(defun storax/gud-execute-prompt ()
+  "Prompt user what to execute."
+  (interactive)
+  (let ((user-input
+         (read-string "Execute: " nil storax-pdb-print-hist (symbol-at-point))))
+    (gud-call (format "!%s" user-input))))
+
+(defun storax/pdb (command-line)
+  "Run pdb on program FILE in buffer `*gud-FILE*'.
+The directory containing FILE becomes the initial working directory
+and source-file directory for your debugger."
+  (interactive
+   (list (gud-query-cmdline 'pdb)))
+
+  (gud-common-init command-line nil 'gud-pdb-marker-filter)
+  (set (make-local-variable 'gud-minor-mode) 'pdb)
+
+  (gud-def gud-break  "break %d%f:%l"  "\C-b" "Set breakpoint at current line.")
+  (gud-def gud-remove "clear %d%f:%l"  "\C-d" "Remove breakpoint at current line")
+  (gud-def gud-step   "step"         "\C-s" "Step one source line with display.")
+  (gud-def gud-next   "next"         "\C-n" "Step one line (skip functions).")
+  (gud-def gud-cont   "continue"     "\C-r" "Continue with display.")
+  (gud-def gud-finish "return"       "\C-f" "Finish executing current function.")
+  (gud-def gud-up     "up"           "<" "Up one stack frame.")
+  (gud-def gud-down   "down"         ">" "Down one stack frame.")
+  (gud-def gud-until   "until"         "\C-w" "Execute until higher line number.")
+  (gud-def gud-print-prompt (storax/gud-print-prompt) "\C-p" "Print prompt.")
+  (gud-def gud-jump "jump %l"        "\C-j" "Set execution address to current line.")
+  (gud-def gud-execute-prompt (storax/gud-execute-prompt) "\C-e" "Execute Python statement.")
+  ;; (setq comint-prompt-regexp "^(.*pdb[+]?) *")
+  (setq comint-prompt-regexp "^(Pdb) *")
+  (setq paragraph-start comint-prompt-regexp)
+  (run-hooks 'pdb-mode-hook))
 
 ;;; funcs.el ends here
