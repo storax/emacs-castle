@@ -526,52 +526,52 @@ HIGHLIGHT-REGEXP is the regexp to highlight errors."
 
 (defun storax/pdb-break ()
   "Set breakpoint at current line."
-  (interactive "p")
+  (interactive)
   (gud-call "break %d%f:%l"))
 
 (defun storax/pdb-clear-current-line ()
   "Clear breakpoint at current line."
-  (interactive "p")
+  (interactive)
   (gud-call "clear %d%f:%l"))
 
 (defun storax/pdb-step ()
   "Pdb step command."
-  (interactive "p")
+  (interactive)
   (gud-call "step"))
 
 (defun storax/pdb-next ()
   "Pdb next command."
-  (interactive "p")
+  (interactive)
   (gud-call "next"))
 
 (defun storax/pdb-continue ()
   "Pdb continue command."
-  (interactive "p")
+  (interactive)
   (gud-call "continue"))
 
 (defun storax/pdb-return ()
   "Pdb return command."
-  (interactive "p")
+  (interactive)
   (gud-call "return"))
 
 (defun storax/pdb-up ()
   "Pdb up command."
-  (interactive "p")
+  (interactive)
   (gud-call "up"))
 
 (defun storax/pdb-down ()
   "Pdb down command."
-  (interactive "p")
+  (interactive)
   (gud-call "down"))
 
 (defun storax/pdb-until ()
   "Pdb until command."
-  (interactive "p")
+  (interactive)
   (gud-call "until"))
 
 (defun storax/pdb-jump ()
   "Pdb jump command."
-  (interactive "p")
+  (interactive)
   (gud-call "jump %l"))
 
 (defun storax/pdb (command-line)
