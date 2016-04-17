@@ -375,6 +375,18 @@ Return the output."
          breakpoints)
       (progn (message "No breakpoints set!") nil))))
 
+(defun storax/pdb-goto-breakpoint (breakpoint)
+  "Goto the location of BREAKPOINT"
+  (interactive (list (storax/pdb-select-breakpoint)))
+  (when breakpoint
+    (let ((cb (current-buffer)))
+      (with-current-buffer
+          (if (eq (current-buffer) gud-comint-buffer)
+              (find-file-other-window (storax-bp-file breakpoint))
+            (find-file (storax-bp-file breakpoint)))
+        (goto-line (storax-bp-line breakpoint)))
+      (when (eq cb gud-comint-buffer)
+        (switch-to-buffer-other-window gud-comint-buffer)))))
 
 (defun storax/pdb-print-symbol ()
   "Print the current symbol at point."
@@ -484,6 +496,7 @@ and source-file directory for your debugger."
   (gud-def gud-jump "jump %l"        "\C-j" "Set execution address to current line.")
   (gud-def gud-execute-prompt (storax/pdb-execute-prompt) "\C-e" "Execute Python statement.")
   ;; (setq comint-prompt-regexp "^(.*pdb[+]?) *")
+  (gud-def gud-goto-break (call-interactively 'storax/pdb-goto-breakpoint) "\C-g" "Goto breakpoint.")
   (setq comint-prompt-regexp storax-pdb-input-regexp)
   (setq paragraph-start comint-prompt-regexp)
   (run-hooks 'pdb-mode-hook))

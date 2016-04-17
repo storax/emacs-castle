@@ -31,6 +31,7 @@
   "dd" 'gud-down
   "dU" 'gud-until
   "df" 'gud-finish
+  "dg" 'storax/pdb-goto-breakpoint
   "dps" 'storax/pdb-print-symbol
   "dpl" 'storax/pdb-print-line
   "dpr" 'storax/pdb-print-region
