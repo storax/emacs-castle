@@ -18,6 +18,9 @@
 (require 'comint)
 (require 'gud)
 (require 'python)
+(eval-when-compile (require 'cl-lib))
+
+(cl-defstruct storax-bp bpnumber type disp enabled file line condition)
 
 (defvar storax-pdb-print-hist nil "History for pdb print commands.")
 
@@ -253,14 +256,7 @@ detecting a prompt at the end of the buffer."
     (setq storax-pdb-output-filter-in-progress nil
           storax-pdb-output-filter-buffer
           (substring storax-pdb-output-filter-buffer
-                     0 (match-beginning 0)))
-    (when (string-match
-           "^"
-           storax-pdb-output-filter-buffer)
-      ;; Some shells, like IPython might append a prompt before the
-      ;; output, clean that.
-      (setq storax-pdb-output-filter-buffer
-            (substring storax-pdb-output-filter-buffer (match-end 0)))))
+                     0 (match-beginning 0))))
   (if storax-pdb-output-filter-in-progress
       ""
     "(Pdb) "))
@@ -281,6 +277,39 @@ Return the output."
     (prog1
         storax-pdb-output-filter-buffer
       (setq storax-pdb-output-filter-buffer nil))))
+
+(defun storax/pdb-parse-breakpoint (line)
+  "Return a breakpoint parsed from LINE."
+  (string-match
+   "^\\([0-9]+\\)[ \\t]+\\(\\w+\\)[ \\t]+\\(\\w+\\)[ \\t]+\\(\\w+\\)[ \\t]+at[ \\t]+\\(.*\\):\\([0-9]+\\)"
+   line)
+  (make-storax-bp
+   :bpnumber (string-to-number (match-string 1 line))
+   :type (match-string 2 line)
+   :disp (match-string 3 line)
+   :enabled (string= "yes" (match-string 4 line))
+   :file (match-string 5 line)
+   :line (string-to-number (match-string 6 line))
+   :condition nil))
+
+(defun storax/pdb-parse-condition (line)
+  "Return the condition string from LINE."
+  (string-match
+   "^[ \t]+stop only if \\(.*\\)$" line)
+  (match-string 1 line))
+
+(defun storax/pdb-get-breakpoints ()
+  "Return a list of breakpoints."
+  (let ((output
+         (cdr (split-string
+          (storax/pdb-call-no-output "break")
+          "[\n\r]+")))
+        breakpoints)
+    (dolist (line output)
+      (if (string-match "^[0-9]+" line)
+          (add-to-list 'breakpoints (storax/pdb-parse-breakpoint line) t)
+        (setf (storax-bp-condition (car (last breakpoints))) (storax/pdb-parse-condition line))))
+    breakpoints))
 
 (defun storax/pdb-print-symbol ()
   "Print the current symbol at point."
@@ -384,7 +413,7 @@ and source-file directory for your debugger."
   (gud-def gud-cont   "continue"     "\C-r" "Continue with display.")
   (gud-def gud-finish "return"       "\C-f" "Finish executing current function.")
   (gud-def gud-up     "up"           "<" "Up one stack frame.")
-  (gud-def gud-down   "down"         ">" "Down one stack frame.")
+pp  (gud-def gud-down   "down"         ">" "Down one stack frame.")
   (gud-def gud-until   "until"         "\C-w" "Execute until higher line number.")
   (gud-def gud-print-prompt (storax/pdb-print-prompt) "\C-p" "Print prompt.")
   (gud-def gud-jump "jump %l"        "\C-j" "Set execution address to current line.")
