@@ -20,7 +20,7 @@
 (require 'python)
 (eval-when-compile (require 'cl-lib))
 
-(cl-defstruct storax-bp bpnumber type disp enabled file line condition)
+(cl-defstruct storax-bp bpnumber type disp enabled file line hits condition ignore)
 
 (defvar storax-pdb-print-hist nil "History for pdb print commands.")
 
@@ -290,13 +290,27 @@ Return the output."
    :enabled (string= "yes" (match-string 4 line))
    :file (match-string 5 line)
    :line (string-to-number (match-string 6 line))
-   :condition nil))
+   :hits 0
+   :condition nil
+   :ignore 0))
 
 (defun storax/pdb-parse-condition (line)
   "Return the condition string from LINE."
   (string-match
    "^[ \t]+stop only if \\(.*\\)$" line)
   (match-string 1 line))
+
+(defun storax/pdb-parse-ignore (line)
+  "Return ignore from LINE."
+  (string-match
+   "^[ \t]+ignore next \\([0-9]+\\) hits?$" line)
+  (string-to-number (match-string 1 line)))
+
+(defun storax/pdb-parse-hits (line)
+  "Return hits from LINE."
+  (string-match
+   "^[ \t]+breakpoint already hit \\([0-9]+\\) times?$" line)
+  (string-to-number (match-string 1 line)))
 
 (defun storax/pdb-get-breakpoints ()
   "Return a list of breakpoints."
@@ -306,10 +320,40 @@ Return the output."
           "[\n\r]+")))
         breakpoints)
     (dolist (line output)
-      (if (string-match "^[0-9]+" line)
-          (add-to-list 'breakpoints (storax/pdb-parse-breakpoint line) t)
-        (setf (storax-bp-condition (car (last breakpoints))) (storax/pdb-parse-condition line))))
+      (cond
+       ((string-match "^[0-9]+" line)
+        (add-to-list 'breakpoints (storax/pdb-parse-breakpoint line) t))
+       ((string-match "^[ \t]+stop only if" line)
+        (setf (storax-bp-condition (car (last breakpoints))) (storax/pdb-parse-condition line)))
+       ((string-match "^[ \t]+ignore next" line)
+        (setf (storax-bp-ignore (car (last breakpoints))) (storax/pdb-parse-ignore line)))
+       ((string-match "^[ \t]+breakpoint already hit" line)
+        (setf (storax-bp-hits (car (last breakpoints))) (storax/pdb-parse-hits line)))))
     breakpoints))
+
+(defun storax/pdb-breakpoints-to-strings (breakpoints)
+  "Convert the list of BREAKPOINTS to a list of strings."
+  (let (strlist)
+    (dolist (bp breakpoints)
+      (let ((bpstr
+             (format "%s: %s %s:%s"
+                     (storax-bp-bpnumber bp)
+                     (if (storax-bp-enabled bp)
+                       "armed"
+                       "off")
+                     (storax-bp-file bp)
+                     (storax-bp-line bp)))
+            (condition (storax-bp-condition bp))
+            (hits (storax-bp-hits bp))
+            (ignore (storax-bp-ignore bp)))
+        (when condition
+          (setq bpstr (concat bpstr "\n  stop only if " condition)))
+        (unless (zerop ignore)
+          (setq bpstr (concat bpstr "\n  ignore next " (number-to-string ignore) " hit(s)")))
+        (unless (zerop hits) 
+          (setq bpstr (concat bpstr "\n  already hit " (number-to-string hits) " time(s)")))
+        (add-to-list 'strlist bpstr t)))
+    strlist))
 
 (defun storax/pdb-print-symbol ()
   "Print the current symbol at point."
@@ -413,7 +457,7 @@ and source-file directory for your debugger."
   (gud-def gud-cont   "continue"     "\C-r" "Continue with display.")
   (gud-def gud-finish "return"       "\C-f" "Finish executing current function.")
   (gud-def gud-up     "up"           "<" "Up one stack frame.")
-pp  (gud-def gud-down   "down"         ">" "Down one stack frame.")
+  (gud-def gud-down   "down"         ">" "Down one stack frame.")
   (gud-def gud-until   "until"         "\C-w" "Execute until higher line number.")
   (gud-def gud-print-prompt (storax/pdb-print-prompt) "\C-p" "Print prompt.")
   (gud-def gud-jump "jump %l"        "\C-j" "Set execution address to current line.")
