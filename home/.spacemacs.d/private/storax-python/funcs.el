@@ -267,13 +267,14 @@ Return the output."
   (let ((comint-preoutput-filter-functions
          '(storax/pdb-output-filter))
         (storax-pdb-output-filter-in-progress t)
-        (inhibit-quit t))
+        (inhibit-quit t)
+        (output-received t))
     (gud-call string)
-    (while storax-pdb-output-filter-in-progress
+    (while (and storax-pdb-output-filter-in-progress output-received)
       ;; `storax/pdb-output-filter' takes care of setting
       ;; `storax/pdb--output-filter-in-progress' to NIL after it
       ;; detects end of output.
-      (accept-process-output (get-buffer-process gud-comint-buffer)))
+      (setq output-received (accept-process-output (get-buffer-process gud-comint-buffer) 0 500)))
     (prog1
         storax-pdb-output-filter-buffer
       (setq storax-pdb-output-filter-buffer nil))))
@@ -368,9 +369,12 @@ Return the output."
   "Return a breakpoint selected by the user."
   (let* ((breakpoints (storax/pdb-get-breakpoints))
          (breakpoint-strings (storax/pdb-breakpoints-to-strings breakpoints)))
-    (storax/pdb-breakpoint-from-string
-     (completing-read "Select Breakpoint: " breakpoint-strings nil t)
-     breakpoints)))
+    (if breakpoints
+        (storax/pdb-breakpoint-from-string
+         (completing-read "Select Breakpoint: " breakpoint-strings nil t)
+         breakpoints)
+      (progn (message "No breakpoints set!") nil))))
+
 
 (defun storax/pdb-print-symbol ()
   "Print the current symbol at point."
