@@ -355,6 +355,23 @@ Return the output."
         (add-to-list 'strlist bpstr t)))
     strlist))
 
+(defun storax/pdb-breakpoint-from-string (bpstr breakpoints)
+  "Return a breakpoint represented by BPSTR from BREAKPOINTS."
+  (string-match "^\\([0-9]+\\): " bpstr)
+  (let ((bpnumber (string-to-number (match-string 1 bpstr))))
+    (catch 'bp
+      (dolist (bp breakpoints)
+        (when (equal bpnumber (storax-bp-bpnumber bp))
+          (throw 'bp bp))))))
+
+(defun storax/pdb-select-breakpoint ()
+  "Return a breakpoint selected by the user."
+  (let* ((breakpoints (storax/pdb-get-breakpoints))
+         (breakpoint-strings (storax/pdb-breakpoints-to-strings breakpoints)))
+    (storax/pdb-breakpoint-from-string
+     (completing-read "Select Breakpoint: " breakpoint-strings nil t)
+     breakpoints)))
+
 (defun storax/pdb-print-symbol ()
   "Print the current symbol at point."
   (interactive)
