@@ -23,6 +23,7 @@
 (cl-defstruct storax-bp bpnumber type disp enabled file line hits condition ignore)
 
 (defvar storax-pdb-print-hist nil "History for pdb print commands.")
+(defvar storax-pdb-condition-hist nil "History for pdb conditions.")
 
 (defun storax-strip-whitespace (string)
   "Return STRING stripped of all whitespace."
@@ -387,6 +388,38 @@ Return the output."
         (goto-line (storax-bp-line breakpoint)))
       (when (eq cb gud-comint-buffer)
         (switch-to-buffer-other-window gud-comint-buffer)))))
+
+(defun storax/pdb-clear-breakpoint (breakpoint)
+  "Clear BREAKPOINT."
+  (interactive (list (storax/pdb-select-breakpoint)))
+  (when breakpoint
+    (gud-call (format "clear %s" (storax-bp-bpnumber breakpoint)))))
+
+(defun storax/pdb-toogle-breakpoint (breakpoint)
+  "Toggle BREAKPOINT enabled status."
+  (interactive (list (storax/pdb-select-breakpoint)))
+  (when breakpoint
+    (if (storax-bp-enabled breakpoint)
+        (gud-call (format "disable %s" (storax-bp-bpnumber breakpoint)))
+      (gud-call (format "enable %s" (storax-bp-bpnumber breakpoint))))))
+
+(defun storax/pdb-ignore-breakpoint (breakpoint num)
+  "Ignore BREAKPOINT NUM times."
+  (interactive
+   (list
+    (storax/pdb-select-breakpoint)
+    (read-number "Ignore N times: " 0)))
+  (when breakpoint
+    (gud-call (format "ignore %s %s" (storax-bp-bpnumber breakpoint) num))))
+
+(defun storax/pdb-condition-breakpoint (breakpoint cond)
+  "Execute BREAKPOINT only when COND is True."
+  (interactive
+   (list
+    (storax/pdb-select-breakpoint)
+    (read-string "Condition: " nil storax-pdb-condition-hist)))
+  (when (and breakpoint (not (string= "" cond)))
+    (gud-call (format "condition %s %s" (storax-bp-bpnumber breakpoint) cond))))
 
 (defun storax/pdb-print-symbol ()
   "Print the current symbol at point."
