@@ -524,6 +524,56 @@ HIGHLIGHT-REGEXP is the regexp to highlight errors."
     (gud-set-buffer)
     (setq buffer-read-only nil)))
 
+(defun storax/pdb-break ()
+  "Set breakpoint at current line."
+  (interactive "p")
+  (gud-call "break %d%f:%l"))
+
+(defun storax/pdb-clear-current-line ()
+  "Clear breakpoint at current line."
+  (interactive "p")
+  (gud-call "clear %d%f:%l"))
+
+(defun storax/pdb-step ()
+  "Pdb step command."
+  (interactive "p")
+  (gud-call "step"))
+
+(defun storax/pdb-next ()
+  "Pdb next command."
+  (interactive "p")
+  (gud-call "next"))
+
+(defun storax/pdb-continue ()
+  "Pdb continue command."
+  (interactive "p")
+  (gud-call "continue"))
+
+(defun storax/pdb-return ()
+  "Pdb return command."
+  (interactive "p")
+  (gud-call "return"))
+
+(defun storax/pdb-up ()
+  "Pdb up command."
+  (interactive "p")
+  (gud-call "up"))
+
+(defun storax/pdb-down ()
+  "Pdb down command."
+  (interactive "p")
+  (gud-call "down"))
+
+(defun storax/pdb-until ()
+  "Pdb until command."
+  (interactive "p")
+  (gud-call "until"))
+
+(defun storax/pdb-jump ()
+  "Pdb jump command."
+  (interactive "p")
+  (gud-call "jump %l"))
+
 (defun storax/pdb (command-line)
   "Run pdb on program COMMAND-LINE in buffer `*gud-FILE*'.
 The directory containing FILE becomes the initial working directory
