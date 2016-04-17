@@ -53,7 +53,44 @@
     (bind-key "C-c C-p" 'storax/previous-error-wrapped python-mode-map)
     (bind-key "M-n" 'python-nav-forward-block python-mode-map)
     (bind-key "M-p" 'python-nav-backward-block python-mode-map)
-    (bind-key "C-c C-o" 'python-helm-occur python-mode-map)))
+    (bind-key "C-c C-o" 'python-helm-occur python-mode-map)
+    (spacemacs/set-leader-keys-for-major-mode 'python-mode
+      "tt" 'storax/python-test-tox-pytest-runner
+      "ta" 'storax/python-test-tox-pytest-runner-all
+      "tb" 'storax/python-test-tox-pytest-runner-module
+      "tm" 'storax/python-test-tox-pytest-runner-module
+      "d SPC" 'gud-break
+      "dj" 'gud-jump
+      "dr SPC" 'gud-remove-line
+      "drb" 'gud-remove-prompt
+      "ds" 'gud-step
+      "dn" 'gud-next
+      "dc" 'gud-cont
+      "du" 'gud-up
+      "dd" 'gud-down
+      "dU" 'gud-until
+      "df" 'gud-finish
+      "dg" 'storax/pdb-goto-breakpoint
+      "db" nil
+      "db SPC" 'gud-break
+      "dbb" 'python-toggle-breakpoint
+      "dbg" 'storax/pdb-goto-breakpoint
+      "dbc" 'storax/pdb-clear-breakpoint
+      "dbt" 'storax/pdb-toogle-breakpoint
+      "dbi" 'storax/pdb-ignore-breakpoint
+      "dbc" 'storax/pdb-condition-breakpoint
+      "dbc" 'storax/pdb-condition-breakpoint
+      "dps" 'storax/pdb-print-symbol
+      "dpl" 'storax/pdb-print-line
+      "dpr" 'storax/pdb-print-region
+      "dpp SPC" 'storax/pdb-pprint-prompt
+      "dpps" 'storax/pdb-pprint-symbol
+      "dppl" 'storax/pdb-pprint-line
+      "dppr" 'storax/pdb-pprint-region
+      "dp SPC" 'storax/pdb-print-prompt
+      "del" 'storax/pdb-execute-line
+      "der" 'storax/pdb-execute-region
+      "de SPC" 'storax/pdb-execute-prompt)))
 
 (defun storax-python/init-electric-operator ()
   (use-package electric-operator
