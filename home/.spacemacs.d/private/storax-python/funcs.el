@@ -506,6 +506,24 @@ Return the output."
          (read-string "Execute: " nil storax-pdb-print-hist (symbol-at-point))))
     (gud-call (format "!%s" user-input))))
 
+(defun storax/gud-compilation-start (command &optional name-function marker-filter highlight-regexp)
+  "Start a gud session.
+
+Execute COMMAND.
+NAME-FUNCTION can either be nil or a function which takes a mode as argument.
+MARKER-FILTER is a gud marker filter, e.g. `gud-pdb-marker-filter'.
+HIGHLIGHT-REGEXP is the regexp to highlight errors."
+  (with-current-buffer (compilation-start command nil name-function highlight-regexp)
+    (gud-mode)
+    (set (make-local-variable 'gud-target-name)
+         command)
+    (set (make-local-variable 'gud-marker-filter) marker-filter)
+    (setq gud-last-last-frame nil)
+    (set-process-filter (get-buffer-process (current-buffer)) 'gud-filter)
+    (set-process-sentinel (get-buffer-process (current-buffer)) 'gud-sentinel)
+    (gud-set-buffer)
+    (setq buffer-read-only nil)))
+
 (defun storax/pdb (command-line)
   "Run pdb on program COMMAND-LINE in buffer `*gud-FILE*'.
 The directory containing FILE becomes the initial working directory
@@ -513,7 +531,7 @@ and source-file directory for your debugger."
   (interactive
    (list (gud-query-cmdline 'pdb)))
 
-  (gud-common-init command-line nil 'gud-pdb-marker-filter)
+  (storax/gud-compilation-start command-line nil 'gud-pdb-marker-filter)
   (set (make-local-variable 'gud-minor-mode) 'pdb)
 
   (gud-def gud-break  "break %d%f:%l"  "\C-d\C-b" "Set breakpoint at current line.")
