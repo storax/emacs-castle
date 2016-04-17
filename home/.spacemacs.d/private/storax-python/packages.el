@@ -57,15 +57,14 @@
     (spacemacs/set-leader-keys-for-major-mode 'python-mode
       "d SPC" 'storax/pdb-break
       "dU" 'storax/pdb-until
-      "db SPC" 'storax/pdb-break
       "db" nil
-      "dbC" 'storax/pdb-condition-breakpoint
-      "dbR" 'storax/pdb-clear-current-line
+      "db SPC" 'storax/pdb-break
+      "dbc" 'storax/pdb-condition-breakpoint
+      "dbr" 'storax/pdb-clear-current-line
       "dbb" 'python-toggle-breakpoint
-      "dbc" 'storax/pdb-clear-breakpoint
+      "dbd" 'storax/pdb-clear-breakpoint
       "dbg" 'storax/pdb-goto-breakpoint
       "dbi" 'storax/pdb-ignore-breakpoint
-      "dbr" 'storax/pdb-clear-breakpoint
       "dbt" 'storax/pdb-toogle-breakpoint
       "dc" 'storax/pdb-cont
       "dd" 'storax/pdb-down
