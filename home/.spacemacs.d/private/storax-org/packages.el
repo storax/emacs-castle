@@ -75,7 +75,7 @@
            "* TODO %?\n" :clock-in t :clock-resume t)
           ("r" "respond" entry (file "~/Documents/org/refile.org")
            "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n" :clock-in t :clock-resume t :immediate-finish t)
-          ("n" "note" entry (file "~/Documents/org/refile.org")
+          ("n" "note" entry (file "~/Documents/org/notes.org")
            "* %? :NOTE:\n" :clock-in t :clock-resume t)
           ("j" "Journal" entry (file+datetree "~/Documents/org/diary.org")
            "* %?\n%U\n" :clock-in t :clock-resume t)
