@@ -428,7 +428,7 @@
             op/site-main-title "Storax"
             op/site-sub-title "Eat sleep code repeat! Soon to be a major emacs mode."
             op/personal-github-link "https://github.com/storax"
-            op/personal-disqus-shortname "storax"
+            op/personal-disqus-shortname "storaxgithubio"
             op/category-config-alist
             '(("blog" ;; this is the default configuration
                :show-meta t
