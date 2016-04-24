@@ -249,7 +249,6 @@
    '((emacs-lisp . t)
      (dot . t)
      (ditaa . t)
-     (R . t)
      (python . t)
      (ruby . t)
      (gnuplot . t)
@@ -358,12 +357,7 @@
   (setq org-read-date-prefer-future 'time)
   (setq org-cycle-include-plain-lists t)
   (setq org-time-clocksum-format
-        '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((sh . t)
-     (python . t)
-     (emacs-lisp . t))))
+        '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t)))
 
 (defun storax-org/init-org ()
   (use-package org
