@@ -14,7 +14,7 @@
 ;;; Code:
 
 (defconst storax-org-packages
-  '(org orgbox ox-rst))
+  '(org orgbox ox-rst org-page))
 
 (defun storax-org/init-orgbox ()
   (use-package orgbox))
@@ -409,5 +409,47 @@
       (run-at-time "06:00" 86400 '(lambda () (setq org-habit-show-habits t)))
       (run-at-time "00:59" 3600 'org-save-all-org-buffers)
       (org-babel-lob-ingest storax-org-lob-file))))
+
+(defun storax-org/init-org-page ()
+  (use-package org-page
+    :init
+    (progn
+      (spacemacs/declare-prefix "opb" "blog" "org-page")
+      (spacemacs/set-leader-keys "opbp" 'op/do-publication)
+      (spacemacs/set-leader-keys "opbn" 'op/new-post)
+      (spacemacs/set-leader-keys "opb TAB" 'op/insert-options-template)
+      (spacemacs/set-leader-keys "opb SPC" 'op/do-publication-and-preview-site))
+    :config
+    (progn
+      (setq op/repository-directory (expand-file-name "~/projects/storax.github.io/")
+            op/repository-org-branch "source"
+            op/repository-html-branch "master"
+            op/site-domain "https://storax.github.io/"
+            op/site-main-title "Storax"
+            op/site-sub-title "Eat sleep code repeat! Soon to be a major emacs mode."
+            op/personal-github-link "https://github.com/storax"
+            op/personal-disqus-shortname "storax"
+            op/category-config-alist
+            '(("blog" ;; this is the default configuration
+               :show-meta t
+               :show-comment t
+               :uri-generator op/generate-uri
+               :uri-template "/blog/%y/%m/%d/%t/"
+               :sort-by :date     ;; how to sort the posts
+               :category-index t) ;; generate category index or not
+              ("index"
+               :show-meta nil
+               :show-comment nil
+               :uri-generator op/generate-uri
+               :uri-template "/"
+               :sort-by :date
+               :category-index nil)
+              ("about"
+               :show-meta nil
+               :show-comment nil
+               :uri-generator op/generate-uri
+               :uri-template "/about/"
+               :sort-by :date
+               :category-index nil))))))
 
 ;;; packages.el ends here
