@@ -421,7 +421,10 @@
       (spacemacs/set-leader-keys "opb SPC" 'op/do-publication-and-preview-site))
     :config
     (progn
-      (setq op/repository-directory (expand-file-name "~/projects/storax.github.io/")
+      (setq op/theme-root-directory (concat (file-name-directory load-file-name) "org-page-themes")
+            op/theme 'storax
+            op/highlight-render 'htmlize
+            op/repository-directory (expand-file-name "~/projects/storax.github.io/")
             op/repository-org-branch "source"
             op/repository-html-branch "master"
             op/site-domain "https://storax.github.io/"
