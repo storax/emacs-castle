@@ -13,6 +13,9 @@
 
 ;;; Code:
 
+(defvar storax-org-pages-theme-dir
+  (concat (file-name-directory load-file-name) "org-page-themes"))
+
 (defconst storax-org-packages
   '(org orgbox ox-rst org-page helm-org-rifle))
 
@@ -422,7 +425,7 @@
       (spacemacs/set-leader-keys "opb SPC" 'op/do-publication-and-preview-site))
     :config
     (progn
-      (setq op/theme-root-directory (concat (file-name-directory load-file-name) "org-page-themes")
+      (setq op/theme-root-directory storax-org-pages-theme-dir
             op/theme 'storax
             op/highlight-render 'htmlize
             op/repository-directory (expand-file-name "~/projects/storax.github.io/")

@@ -1,0 +1,28 @@
+#+TITLE: storax-ace-window layer
+#+HTML_HEAD_EXTRA: <link rel="stylesheet" type="text/css" href="../css/readtheorg.css" />
+
+#+CAPTION: logo
+
+# The maximum height of the logo should be 200 pixels.
+[[img/storax-ace-window.png]]
+
+* Table of Contents                                        :TOC_4_org:noexport:
+ - [[Description][Description]]
+ - [[Install][Install]]
+ - [[Key bindings][Key bindings]]
+
+* Description
+Adds additional keybinding for =ace-window=.
+
+* Install
+To use this contribution add it to your =~/.spacemacs=
+
+#+begin_src emacs-lisp
+  (setq-default dotspacemacs-configuration-layers '(storax-ace-window))
+#+end_src
+
+* Key bindings
+
+| Key Binding | Description |
+|-------------+-------------|
+| ~C-z~       | ace-window  |

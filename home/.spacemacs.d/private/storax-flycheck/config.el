@@ -13,6 +13,9 @@
 
 ;;; Code:
 
-(defvar storax/modeline-flash-color "#af00d7")
+(defcustom storax/modeline-flash-color "#af00d7"
+  "Color for flashing when wrapping next error search."
+  :group 'flycheck
+  :type 'color)
 
 ;;; config.el ends here

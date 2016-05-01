@@ -16,6 +16,7 @@
 (configuration-layer/declare-layer 'storax-secret)
 
 (defun storax-erc/erc-gitter ()
+  "Load the secrets file and use the gitter token from there to login to gitter."
   (interactive)
   (let ((erc-server-connect-function 'erc-open-tls-stream))
     (storax/load-secrets)
