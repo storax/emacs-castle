@@ -14,7 +14,7 @@
 ;;; Code:
 
 (defconst storax-org-packages
-  '(org orgbox ox-rst org-page))
+  '(org orgbox ox-rst org-page helm-org-rifle))
 
 (defun storax-org/init-orgbox ()
   (use-package orgbox))
@@ -455,5 +455,13 @@
                :uri-template "/about/"
                :sort-by :date
                :category-index nil))))))
+
+(defun storax-org/init-helm-org-rifle ()
+  (use-package helm-org-rifle
+    :init
+    (progn
+      (spacemacs/declare-prefix "o SPC" "rifle" "helm-org-rifle")
+      (spacemacs/set-leader-keys "o SPC SPC" 'helm-org-rifle)
+      (spacemacs/set-leader-keys "o SPC b" 'helm-org-rifle-current-buffer))))
 
 ;;; packages.el ends here
