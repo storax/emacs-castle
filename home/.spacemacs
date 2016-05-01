@@ -24,10 +24,10 @@ values."
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
      ansible
-     asciidoc
+     ;;asciidoc
      auto-completion
      better-defaults
-     django
+     ;;django
      emacs-lisp
      erc
      git
@@ -45,7 +45,7 @@ values."
             shell-default-height 30
             shell-default-position 'bottom)
      shell-scripts
-     spacemacs-layouts
+     ;;spacemacs-layouts
      syntax-checking
      (theming
       :variables theming-modifications
@@ -65,7 +65,7 @@ values."
                  (powerline-inactive2 :inherit mode-line-inactive :background "#6F6F6F" :foreground "#9FC29F")
                  (region :background "#222222")
                  (scroll-bar :background "#545450" :foreground "#3F3F3F"))))
-     vagrant
+     ;;vagrant
      ;; version-control
      xkcd
      yaml
@@ -73,7 +73,7 @@ values."
      storax-unkillable-scratch
      storax-ace-window
      storax-avy
-      storax-desktop
+     storax-desktop
      storax-popup
      storax-dabbrev
      storax-expand-region
@@ -89,7 +89,7 @@ values."
      storax-python
      storax-org
      storax-magit
-     storax-latex
+     ;;storax-latex
      (storax-dash
       :variables
       storax/docsets-to-install
@@ -104,7 +104,7 @@ values."
         "Qt" "Requests" "Sphinx" "Vagrant" "emacs"))
      storax-visual-regexp-steroids
      ;; storax-major-mode-icons
-     storax-mode-icons
+     ;;storax-mode-icons
      storax-translate
      ;; storax-powerline
      storax-compilation
