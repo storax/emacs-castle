@@ -397,6 +397,7 @@
     :config
     (progn
       (storax-org/setup-org)
+      (define-key org-mode-map (kbd "C-,") 'er/contract-region)
       (add-hook 'org-clock-out-hook 'org-clock-remove-empty-clock-drawer 'append)
       (add-hook 'org-clock-out-hook 'storax/org-clock-out-maybe 'append)
       (add-hook 'org-babel-after-execute-hook 'storax/org-display-inline-images 'append)
