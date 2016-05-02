@@ -21,6 +21,7 @@
     :commands (fold-dwim-hide-all fold-dwim-show-all fold-dwim-toggle-selective-display fold-dwim-toggle)
     :defer t
     :init
+    (spacemacs/declare-prefix "nd" "fold" "fold-dwim")
     (spacemacs/set-leader-keys "ndh" 'fold-dwim-hide-all)
     (spacemacs/set-leader-keys "nds" 'fold-dwim-show-all)
     (spacemacs/set-leader-keys "ndT" 'fold-dwim-toggle)
