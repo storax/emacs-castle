@@ -14,7 +14,7 @@
 ;;; Code:
 
 (defconst storax-helm-packages
-  '(helm helm-swoop))
+  '(helm helm-swoop helm-ag))
 
 (defun storax-helm/post-init-helm ()
   (use-package helm
@@ -44,5 +44,13 @@
     (bind-key "C-s" 'helm-next-line helm-swoop-map)
     (bind-key "C-r" 'helm-previous-line helm-multi-swoop-map)
     (bind-key "C-s" 'helm-next-line helm-multi-swoop-map)))
+
+(defun storax-helm/post-init-helm-ag ()
+  (use-package helm-ag
+    :defer t
+    :init
+    (progn
+      (spacemacs/declare-prefix "sa SPC" "dir" "helm-ag in dir")
+      (storax/create-helm-ag-bindings storax-helm-ag-dirs-alist))))
 
 ;;; packages.el ends here

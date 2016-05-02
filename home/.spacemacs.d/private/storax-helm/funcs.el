@@ -23,4 +23,23 @@
     (if (and (stringp sel) (string-match "/\\.\\.$" sel))
         (helm-previous-line 1))))
 
+(defun storax/helm-ag-in-dir (dir)
+  "Search with ag in the given DIR."
+  (helm-do-ag nil (list dir)))
+
+(defun storax/create-helm-ag-bindings (dir-alist)
+  "Create keybindings for searching dirs with helm-ag.
+
+The given DIR-ALIST should map keybindings to directories.
+All keybindings are prepended with `storax-helm-ag-dirs-prefix'"
+  (dolist (keydir dir-alist)
+    (let* ((keychord (concat storax-helm-ag-dirs-prefix (car keydir)))
+          (symname (concat "storax-helm-ag-" (file-name-base (directory-file-name (cdr keydir)))))
+          (sym (make-symbol symname))
+          (lf `(lambda ()
+                 ,(concat "Search in " (cdr keydir))
+                 (interactive)
+                 (storax/helm-ag-in-dir ,(cdr keydir)))))
+    (spacemacs/set-leader-keys keychord sym))))
+
 ;;; funcs.el ends here
