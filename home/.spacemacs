@@ -346,7 +346,7 @@ layers configuration. You are free to put any user code."
       (interactive)
       (kill-new isearch-string))
     (bind-key "M-w" 'storax/isearch-kill isearch-mode-map))
-
+  (bind-key "C-x C-k" 'kill-buffer)
   ;; Builtin Auto Modes
   (add-to-list 'auto-mode-alist '("\\.qss$" . css-mode))
   ;; Aliases

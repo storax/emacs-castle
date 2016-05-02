@@ -592,4 +592,25 @@ Late deadlines first, then scheduled, then non-late deadlines"
 (defun storax/org-is-scheduled-late (date-str)
   (string-match "Sched\.\\(.*\\)x:" date-str))
 
+(defvar storax/capture-history nil)
+
+;; Org capture stuff
+(defun storax/capture-prompt (prompt variable)
+  "PROMPT for string, save it to VARIABLE and insert it."
+  (make-local-variable variable)
+  (set variable (read-string (concat prompt ": ") nil storax/capture-history)))
+
+(defun storax/capture-insert (variable)
+  "Insert content of VARIABLE."
+  (symbol-value variable))
+
+(defun storax/capture-include (what text)
+  "Ask user to include WHAT.  If user agrees return TEXT."
+  (when (y-or-n-p (concat "Include " what "?"))
+    text))
+
+(defalias 'oc/prmt 'storax/capture-prompt)
+(defalias 'oc/ins 'storax/capture-insert)
+(defalias 'oc/inc 'storax/capture-include)
+
 ;;; funcs.el ends here
