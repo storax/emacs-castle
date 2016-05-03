@@ -50,7 +50,7 @@
     :defer t
     :init
     (progn
-      (spacemacs/declare-prefix "sa SPC" "dir" "helm-ag in dir")
+      (spacemacs/declare-prefix storax-helm-ag-dirs-prefix "dir" "helm-ag in dir")
       (storax/create-helm-ag-bindings storax-helm-ag-dirs-alist))))
 
 ;;; packages.el ends here

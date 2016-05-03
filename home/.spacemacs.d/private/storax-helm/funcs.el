@@ -33,13 +33,16 @@
 The given DIR-ALIST should map keybindings to directories.
 All keybindings are prepended with `storax-helm-ag-dirs-prefix'"
   (dolist (keydir dir-alist)
-    (let* ((keychord (concat storax-helm-ag-dirs-prefix (car keydir)))
-          (symname (concat "storax-helm-ag-" (file-name-base (directory-file-name (cdr keydir)))))
-          (sym (make-symbol symname))
-          (lf `(lambda ()
-                 ,(concat "Search in " (cdr keydir))
-                 (interactive)
-                 (storax/helm-ag-in-dir ,(cdr keydir)))))
-    (spacemacs/set-leader-keys keychord sym))))
+    (let* ((key (car keydir))
+           (dir (cdr keydir))
+           (keychord (concat storax-helm-ag-dirs-prefix key))
+           (symname (concat "storax-helm-ag-" (file-name-base (directory-file-name dir))))
+           (sym (make-symbol symname))
+           (lf `(lambda ()
+                  ,(concat "Search in " dir " with `helm-ag'.")
+                  (interactive)
+                  (storax/helm-ag-in-dir ,dir))))
+      (fset sym lf)
+      (spacemacs/set-leader-keys keychord sym))))
 
 ;;; funcs.el ends here

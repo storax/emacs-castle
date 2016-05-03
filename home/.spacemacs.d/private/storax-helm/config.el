@@ -15,7 +15,8 @@
 
 (defvar storax-helm-ag-dirs-prefix "sa SPC "
   "Prefix for all keybindings of `storax-helm-ag-dirs-alist'")
-(defvar storax-helm-ag-dirs-alist '(("e" . "~/projects/emaci"))
+(defvar storax-helm-ag-dirs-alist '(("e" . "~/projects/emaci")
+                                    ("o" . "~/Documents/org"))
   "Mapping of keys to directories for fast search access
 with `storax/helm-ag-in-dir'.")
 
