@@ -35,7 +35,7 @@ LEAF is normally ((BEG . END) . WND)."
              end)
         (dotimes (i len)
           (set-text-properties (- len i 1) (- len i)
-                               `(face ,(nth (- len i) avy-lead-faces))
+                               `(face ,(nth (- len i) (reverse avy-lead-faces)))
                                str))
         (when (eq avy-style 'de-bruijn)
           (setq str (concat
