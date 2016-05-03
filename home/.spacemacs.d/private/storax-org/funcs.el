@@ -604,10 +604,10 @@ Late deadlines first, then scheduled, then non-late deadlines"
   "Insert content of VARIABLE."
   (symbol-value variable))
 
-(defun storax/capture-include (what text)
+(defun storax/capture-include (what text &rest fmtvars)
   "Ask user to include WHAT.  If user agrees return TEXT."
   (when (y-or-n-p (concat "Include " what "?"))
-    text))
+    (apply 'format text fmtvars)))
 
 (defalias 'oc/prmt 'storax/capture-prompt)
 (defalias 'oc/ins 'storax/capture-insert)
