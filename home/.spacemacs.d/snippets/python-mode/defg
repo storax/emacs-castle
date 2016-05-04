@@ -1,0 +1,18 @@
+# -*- coding: utf-8 mode: snippet -*-
+# name: Method with sphinx doc google style
+# key: defg
+# group: Definitions
+# expand-env: ((yas-indent-line nil) (yas-wrap-around-region nil))
+# contributor: Michael Markert <markert.michael@googlemail.com>
+# contributor: David Zuber <zuber.david@gmx.de>
+# --
+def ${1:$(progn (setq storax-yas-curcolumn (current-column)) nil)}${1:name}($2):
+${1:$(storax/yas-makeindent storax-yas-curcolumn)}"""$3
+${2:$(storax/yas-format-params yas-text)}
+${1:$(storax/yas-makeindent storax-yas-curcolumn)}Returns:
+${1:$(storax/yas-makeindent storax-yas-curcolumn nil 1)}${4:None}
+
+${1:$(storax/yas-makeindent storax-yas-curcolumn)}Raises:
+${1:$(storax/yas-makeindent storax-yas-curcolumn nil 1)}${5:None}
+${1:$(storax/yas-makeindent storax-yas-curcolumn)}"""
+${1:$(storax/yas-makeindent storax-yas-curcolumn)}$0
