@@ -132,8 +132,8 @@ Use FIELDINDEX as a starting number for generating new fields."
           (poslistindex (+ kwargsindex (* 2 (length kwargs))))
           (kwargdict (cadddr params))
           (kwargdictindex (+ poslistindex (if poslist 1 0)))
-          (indent (storax/yas-makeindent storax-yas-curcolumn t))
-          (indentlvl2 (storax/yas-makeindent storax-yas-curcolumn t 1)))
+          (indent (storax/yas-makeindent storax-yas-curcolumn t 1))
+          (indentlvl2 (storax/yas-makeindent storax-yas-curcolumn t 2)))
      (unless (equal params '(nil nil nil nil))
        (concat
         indent storax-yas-param-section-heading
