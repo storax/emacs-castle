@@ -94,48 +94,67 @@ Fourth one the name of keyword dictionary."
      (storax/yas-parse-poslist paramlist)
      (storax/yas-parse-kwargdict paramlist))))
 
-(defun storax/yas-format-pos-args (args indent)
-  "Return formated positional ARGS indented with INDENT."
-  (mapconcat
-   (lambda (x) (concat indent x " ():"))
-   args
-   ""))
+(defun storax/yas-format-pos-args (args indent fieldindex)
+  "Return formated positional ARGS indented with INDENT.
+Use FIELDINDEX as a starting number for generating new fields."
+  (let ((index (- fieldindex 1)))
+    (mapconcat
+     (lambda (x) (format "%s%s ($%d): $%d" indent x (incf index) (incf index)))
+     args
+     "")))
 
-(defun storax/yas-format-kwargs (kwargs indent)
-  "Return formated KWARGS indented with INDENT."
-  (mapconcat
-   (lambda (x)
-     (let* ((kwarg (car x))
-            (value (cdr x))
-            (type (cond
-                   ((string-match-p "^['\"]" value) "str")
-                   ((or (string= "True" value) (string= "False" value)) "bool")
-                   (t ""))))
-       (format "%s%s (Optional[%s]): Defaults to ``%s``."
-               indent kwarg type value)))
-   kwargs
-   ""))
+(defun storax/yas-format-kwargs (kwargs indent fieldindex)
+  "Return formated KWARGS indented with INDENT.
+Use FIELDINDEX as a starting number for generating new fields."
+  (let ((index (- fieldindex 1)))
+    (mapconcat
+     (lambda (x)
+       (let* ((kwarg (car x))
+              (val (cdr x))
+              (type (cond
+                     ((string-match-p "^['\"]" val) ":str")
+                     ((or (string= "^True$" val) (string= "^False$" val)) ":bool")
+                     ((string-match-p "^[+-]*[0-9]+\\.[0-9]*$" val) ":float")
+                     ((string-match-p "^[+-]*[0-9]+$" val) ":int")
+                     (t ":type"))))
+         (format "%s%s (Optional[${%d%s}]): $%d. Defaults to %s."
+                 indent kwarg (incf index) type (incf index) val)))
+     kwargs
+     "")))
 
 (defun storax/yas-format-params (paramstr)
   "Return a formated docstring for the PARAMSTR."
    (let* ((params (storax/yas-parse-args paramstr))
           (args (car params))
           (kwargs (cadr params))
+          (kwargsindex (+ 1 (* 2 (length args))))
           (poslist (caddr params))
+          (poslistindex (+ kwargsindex (* 2 (length kwargs))))
           (kwargdict (cadddr params))
+          (kwargdictindex (+ poslistindex (if poslist 1 0)))
           (indent (storax/yas-makeindent storax-yas-curcolumn t))
           (indentlvl2 (storax/yas-makeindent storax-yas-curcolumn t 1)))
      (unless (equal params '(nil nil nil nil))
        (concat
         indent storax-yas-param-section-heading
         (when args
-          (storax/yas-format-pos-args args indentlvl2))
+          (storax/yas-format-pos-args args indentlvl2 1))
         (when kwargs
-          (storax/yas-format-kwargs kwargs indentlvl2))
+          (storax/yas-format-kwargs kwargs indentlvl2 kwargsindex))
         (when poslist
-          (concat indentlvl2 "*" poslist ":"))
+          (format "%s*%s: $%d" indentlvl2 poslist poslistindex))
         (when kwargdict
-          (concat indentlvl2 "**" kwargdict ":"))
+          (format "%s**%s: $%d" indentlvl2 kwargdict kwargdictindex))
         "\n"))))
+
+(defun storax/yas-reexpand ()
+  "Expand a snipped again to jump to the new inserted anchors.
+Thanks to Xaldew: http://emacs.stackexchange.com/a/19471."
+  (let ((beg yas-snippet-beg)
+        (end yas-snippet-end))
+    (yas-expand-snippet
+     (buffer-substring-no-properties beg end) beg end
+     '((yas-indent-line nil) (yas-wrap-around-region nil)))
+    (delete-trailing-whitespace beg (- end 1))))
 
 ;;; funcs.el ends here

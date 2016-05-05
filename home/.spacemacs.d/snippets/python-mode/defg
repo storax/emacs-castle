@@ -15,4 +15,4 @@ ${1:$(storax/yas-makeindent storax-yas-curcolumn nil 1)}${4:None}
 ${1:$(storax/yas-makeindent storax-yas-curcolumn)}Raises:
 ${1:$(storax/yas-makeindent storax-yas-curcolumn nil 1)}${5:None}
 ${1:$(storax/yas-makeindent storax-yas-curcolumn)}"""
-${1:$(storax/yas-makeindent storax-yas-curcolumn)}$0
+${1:$(storax/yas-makeindent storax-yas-curcolumn)}${0:$$(storax/yas-reexpand)}
