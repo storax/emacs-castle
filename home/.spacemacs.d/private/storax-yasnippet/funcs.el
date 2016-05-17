@@ -41,7 +41,7 @@ Nil values are removed from the list."
   "Return a string with newline and COLUMN amount of whitespace.
 If newline is non-nil, prepend a newline.
 If LEVEL is non-nil add `python-indent' amount of whitespace per LEVEL."
-  (concat (when newline "\n") (make-string (+ column (* python-indent (if level level 0))) 32)))
+  (concat (when newline "\n") (make-string (+ column (* python-indent-offset (if level level 0))) 32)))
 
 (defun storax/yas-parse-pos-arg (param)
   "Return PARAM if it is a positional argument."

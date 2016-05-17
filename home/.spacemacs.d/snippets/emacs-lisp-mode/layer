@@ -2,12 +2,12 @@
 # name: layer
 # key: layer
 # --
-;;; $1.el --- storax-powerline layer $1$2 file for Spacemacs.
+;;; $1.el --- storax-$3 layer $1$2 file for Spacemacs.
 ;;
-;; Copyright (c) 2012-2016 Sylvain Benner & Contributors
+;; Copyright (c) 2016 David Zuber
 ;;
 ;; Author: David Zuber <zuber.david@gmx.de>
-;; URL: https://github.com/syl20bnr/spacemacs
+;; URL: https://github.com/storax/emacs-castle
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
