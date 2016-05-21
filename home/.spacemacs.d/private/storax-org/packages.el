@@ -433,7 +433,7 @@
             op/repository-html-branch "master"
             op/site-domain "https://storax.github.io/"
             op/site-main-title "Storax"
-            op/site-sub-title "Eat sleep code repeat! Soon to be a major emacs mode."
+            op/site-sub-title "Soon to be a major emacs mode."
             op/personal-github-link "https://github.com/storax"
             op/personal-disqus-shortname "storaxgithubio"
             op/category-config-alist
