@@ -35,6 +35,7 @@ Then evaluate BODY.
 SYMBOLS should be a list the length of the interactive args of FUNC.
 
 \(fn (FUNC SYMBOLS) BODY...)"
+  (declare (indent 1))
   (let* ((func (car spec))
          (symbols (cadr spec))
          (args (lame/interactive-args func))
@@ -45,6 +46,7 @@ SYMBOLS should be a list the length of the interactive args of FUNC.
 (defmacro lame/task (taskname description &rest body)
   "Create a task with TASKNAME and DESCRIPTION and execute BODY.
 The task is marked as finished after calling `lame/done'."
+  (declare (indent 1))
   `(let ((taskbuffername (format "Task: %s" ,taskname)))
      (when (or (not lame-task) (y-or-n-p "Cancel currently running task?"))
        (display-buffer (get-buffer-create taskbuffername) '(display-buffer-reuse-window))
@@ -64,6 +66,7 @@ The task is marked as finished after calling `lame/done'."
   "A step with STEPNAME of a task.
 Add DESCRIPTION to the `lame-task-buffer'.
 Then execute BODY."
+  (declare (indent 1))
   `(progn
      (display-buffer lame-task-buffer '(display-buffer-reuse-window))
      (with-current-buffer lame-task-buffer
@@ -90,6 +93,7 @@ Then execute BODY."
 (defmacro lame/defer (before after)
   "Evaluate BEFORE and return it's return value.
 Sets `lame-continue-callback' to evaluate AFTER."
+  (declare (indent 1))
   `(progn
      (setq lame-continue-callback
            (lambda () ,after))
@@ -98,6 +102,7 @@ Sets `lame-continue-callback' to evaluate AFTER."
 (defmacro lame/show-buffer (msg buffer &rest body)
   "Show MSG and show BUFFER.
 BODY will get executed when calling `lame/continue'."
+  (declare (indent 1))
   `(lame/confirm
     ,msg
     (switch-to-buffer ,buffer)
@@ -106,6 +111,7 @@ BODY will get executed when calling `lame/continue'."
 (defmacro lame/confirm (prompt before &rest after)
   "Ask the user to continue with PROMPT after executing BEFORE.
 If the user agrees execute AFTER else set AFTER as `lame-continue-callback'."
+  (declare (indent 1))
   `(progn
      ,before
      (if (y-or-n-p ,prompt)
@@ -116,6 +122,7 @@ If the user agrees execute AFTER else set AFTER as `lame-continue-callback'."
 (defmacro lame/switch-branch (branch repo &rest after)
   "Checkout BRANCH in a git REPO.
 Execute AFTER afterwards."
+  (declare (indent 1))
   `(lame/confirm
     (format "Checkout branch %s now?" ,branch)
     (magit-status ,repo)
@@ -127,6 +134,7 @@ Execute AFTER afterwards."
 Once the user calls `lame-continue' VAR is set with the current text of the buffer.
 TEXT is the initial text in the buffer.
 Execute AFTER afterwards."
+  (declare (indent 1))
   `(lame/defer
     (progn
       (setq lame-edit-buffer (switch-to-buffer-other-window (format "EDIT_%s" ,var)))
