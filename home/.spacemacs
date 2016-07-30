@@ -111,6 +111,7 @@ values."
      storax-semantic
      storax-erc
      storax-yasnippet
+     storax-notmuch
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -378,7 +379,6 @@ layers configuration. You are free to put any user code."
      (:name "drafts" :query "tag:draft" :key "d")
      (:name "all mail" :query "*" :key "a")
      (:name "mpc" :query "tag:mpc" :key "m"))))
- '(notmuch-search-oldest-first nil)
  '(send-mail-function (quote sendmail-send-it)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
