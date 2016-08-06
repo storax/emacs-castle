@@ -22,11 +22,20 @@ Use `org-id-get-create' to create a new id for some task.")
 
 (defvar storax-org-layer-dir (file-name-directory load-file-name))
 
+(defvar storax-org-caputre-dir
+  (mapconcat
+   'file-name-as-directory
+   (list storax-org-layer-dir "capture")
+   nil))
+
 (defvar storax-org-template-dir
   (mapconcat
    'file-name-as-directory
    (list storax-org-layer-dir "templates")
    nil))
+
+(defvar storax-org-rtd-template
+  (concat storax-org-template-dir "rtdsinglefile.html"))
 
 (defvar storax-org-rtd-theme-path
   (mapconcat

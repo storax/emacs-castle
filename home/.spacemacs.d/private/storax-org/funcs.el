@@ -15,82 +15,94 @@
 
 (require 'cl-lib)
 
-(defun storax/org-buffers ()
-  "Return a list of org buffers."
-  (let (buffers)
-    (dolist (b (buffer-list))
-      (when (with-current-buffer b (equal major-mode 'org-mode))
-        (add-to-list 'buffers (buffer-name b))))
-    buffers))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Capture
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun storax/org-source-file ()
-  "Create a nice abbreviation for the current file."
-  (let ((prjname (projectile-project-name))
-        (fullfile (buffer-file-name)))
-    (if (eq prjname "-")
-        fullfile
-      (format
-       "%s:%s" prjname
-       (substring
-        fullfile (+ (cl-search prjname fullfile) (length prjname) 1)
-        (length fullfile))))))
+(defun storax/new-capture-template (filename)
+  "Create a new capture template"
+  (interactive "sNew capture template file name: ")
+  (find-file (concat storax-org-caputre-dir filename)))
 
-(defun storax/org-insert-source-link ()
-      "Create a source link to the current line in the file."
-      (interactive)
-      (let ((srcfile (storax/org-source-file))
-            (fullfile (buffer-file-name))
-            (lineno (line-number-at-pos
-                     (if (region-active-p)
-                         (region-beginning)
-                       (point))))
-            (lineendno (line-number-at-pos
-                        (if (region-active-p)
-                            (region-end)
-                          (point))))
-            (orgbufs (storax/org-buffers))
-            selectedbuf
-            linestr)
-        (if (equal lineno lineendno)
-            (setq linestr (format "l.%s" lineno))
-          (setq linestr (format "l.%s-l.%s" lineno lineendno)))
-        (unless orgbufs
-          (add-to-list
-           'orgbufs
-           (get-buffer-create (read-from-minibuffer "No org buffer found. New buffer name: ")))
-          (with-current-buffer (car orgbufs)
-            (org-mode)))
-        (if (> (length orgbufs) 1)
-            (setq selectedbuf
-                  (completing-read
-                   "Choose buffer to insert link: "
-                   orgbufs nil t nil
-                   'storax/org-source-link-file-hist))
-          (setq selectedbuf (car orgbufs)))
-        (switch-to-buffer-other-window selectedbuf)
-        (goto-char (point-max))
-        (unless (eq (point) (line-beginning-position))
-          (newline))
-        (org-insert-heading)
-        (insert (org-make-link-string
-                 (format "file:%s::%s" fullfile lineno)
-                 (format "%s:%s" srcfile linestr)))
-        (insert "\n")))
+(defvar storax/capture-history nil)
 
-(defun storax/org-hide-other ()
-  (interactive)
-  (save-excursion
-    (org-back-to-heading 'invisible-ok)
-    (hide-other)))
+;; Org capture stuff
+(defun storax/capture-prompt (prompt variable)
+  "PROMPT for string, save it to VARIABLE and insert it."
+  (make-local-variable variable)
+  (set variable (read-string (concat prompt ": ") nil storax/capture-history)))
 
-(defun storax/set-truncate-lines ()
-  "Toggle value of `truncate-lines' and refresh window display."
-  (interactive)
-  (setq truncate-lines (not truncate-lines)))
+(defun storax/capture-insert (variable)
+  "Insert content of VARIABLE."
+  (symbol-value variable))
+
+(defun storax/capture-include (what text &rest fmtvars)
+  "Ask user to include WHAT.  If user agrees return TEXT."
+  (when (y-or-n-p (concat "Include " what "?"))
+    (apply 'format text fmtvars)))
+
+(defalias 'oc/prmt 'storax/capture-prompt)
+(defalias 'oc/ins 'storax/capture-insert)
+(defalias 'oc/inc 'storax/capture-include)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Publish
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun storax/org-save-then-publish (&optional force)
+  (interactive "P")
+  (save-buffer)
+  (org-save-all-org-buffers)
+  (let ((org-html-head-extra))
+    (org-publish-current-project force)))
+
+(defun storax/org-rtd-template-html-header ()
+  "Read the rtd template html header."
+  (with-temp-buffer
+    (insert-file-contents storax-org-rtd-template)
+    (buffer-string)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Refile
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun storax/org-verify-refile-target ()
   "Exclude todo keywords with a done state from refile targets."
   (not (member (nth 2 (org-heading-components)) org-done-keywords)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Agenda
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun storax/org-match-at-point-p (match &optional todo-only)
+  "Return non-nil if headline at point matches MATCH.
+Here MATCH is a match string of the same format used by
+`org-tags-view'.
+
+If the optional argument TODO-ONLY is non-nil, do not declare a
+match unless headline at point is a todo item.
+
+Credits: http://stackoverflow.com/a/33444799"
+  (let ((todo      (org-get-todo-state))
+        (tags-list (org-get-tags-at)))
+    (eval (cdr (org-make-tags-matcher match)))))
+
+(defun storax/org-agenda-skip-without-match (match)
+  "Skip current headline unless it matches MATCH.
+
+Return nil if headline containing point matches MATCH (which
+should be a match string of the same format used by
+`org-tags-view').  If headline does not match, return the
+position of the next headline in current buffer.
+
+Intended for use with `org-agenda-skip-function', where this will
+skip exactly those headlines that do not match.
+
+Credis: http://stackoverflow.com/a/33444799"
+  (save-excursion
+    (unless (org-at-heading-p) (org-back-to-heading))
+    (let ((next-headline (save-excursion
+                           (or (outline-next-heading) (point-max)))))
+      (if (my/org-match-at-point-p match) nil next-headline))))
 
 (defun storax/org-auto-exclude-function (tag)
   "Evaluate if TAG should be excluded."
@@ -98,116 +110,6 @@
         ((string= tag "hold")
          t))
        (concat "-" tag)))
-
-(defun storax/org-clock-in-to-next (kw)
-  "Switch a task from KW TODO to NEXT when clocking in.
-Skips capture tasks, projects, and subprojects.
-Switch projects and subprojects from NEXT back to TODO"
-  (when (not (and (boundp 'org-capture-mode) org-capture-mode))
-    (cond
-     ((and (member (org-get-todo-state) (list "TODO"))
-           (storax/org-is-task-p))
-      "NEXT")
-     ((and (member (org-get-todo-state) (list "NEXT"))
-           (storax/org-is-project-p))
-      "TODO"))))
-
-(defun storax/org-find-project-task ()
-  "Move point to the parent (project) task if any."
-  (save-restriction
-    (widen)
-    (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
-      (while (org-up-heading-safe)
-        (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
-          (setq parent-task (point))))
-      (goto-char parent-task)
-      parent-task)))
-
-(defun storax/org-punch-in (arg)
-  "Start continuous clocking and set the default task to the selected task.
-If no task is selected set the Organization task as the default task."
-  (interactive "p")
-  (setq storax/org-keep-clock-running t)
-  (if (equal major-mode 'org-agenda-mode)
-      ;;
-      ;; We're in the agenda
-      ;;
-      (let* ((marker (org-get-at-bol 'org-hd-marker))
-             (tags (org-with-point-at marker (org-get-tags-at))))
-        (if (and (eq arg 4) tags)
-            (org-agenda-clock-in '(16))
-          (storax/org-clock-in-organization-task-as-default)))
-    ;;
-    ;; We are not in the agenda
-    ;;
-    (save-restriction
-      (widen)
-                                        ; Find the tags on the current task
-      (if (and (equal major-mode 'org-mode) (not (org-before-first-heading-p)) (eq arg 4))
-          (org-clock-in '(16))
-        (storax/org-clock-in-organization-task-as-default)))))
-
-(defun storax/org-punch-out ()
-  (interactive)
-  (setq storax/org-keep-clock-running nil)
-  (when (org-clock-is-active)
-    (org-clock-out))
-  (org-agenda-remove-restriction-lock))
-
-(defun storax/org-clock-in-default-task ()
-  (save-excursion
-    (org-with-point-at org-clock-default-task
-      (org-clock-in))))
-
-(defun storax/org-clock-in-parent-task ()
-  "Move point to the parent (project) task if any and clock in."
-  (let ((parent-task))
-    (save-excursion
-      (save-restriction
-        (widen)
-        (while (and (not parent-task) (org-up-heading-safe))
-          (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
-            (setq parent-task (point))))
-        (if parent-task
-            (org-with-point-at parent-task
-              (org-clock-in))
-          (when storax/org-keep-clock-running
-            (storax/org-clock-in-default-task)))))))
-
-(defun storax/org-clock-in-organization-task-as-default ()
-  (interactive)
-  (org-with-point-at (org-id-find storax/org-organization-task-id 'marker)
-    (org-clock-in '(16))))
-
-(defun storax/org-clock-out-maybe ()
-  (when (and storax/org-keep-clock-running
-             (not org-clock-clocking-in)
-             (marker-buffer org-clock-default-task)
-             (not org-clock-resolving-clocks-due-to-idleness))
-    (storax/org-clock-in-parent-task)))
-
-(defun storax/org-clock-in-task-by-id (id)
-  "Clock in a task by ID."
-  (org-with-point-at (org-id-find id 'marker)
-    (org-clock-in nil)))
-
-(defun storax/org-clock-in-last-task (arg)
-  "Clock in the interrupted task if there is one.
-Skip the default task and get the next one.
-A prefix ARG forces clock in of the default task."
-  (interactive "p")
-  (let ((clock-in-to-task
-         (cond
-          ((eq arg 4) org-clock-default-task)
-          ((and (org-clock-is-active)
-                (equal org-clock-default-task (cadr org-clock-history)))
-           (caddr org-clock-history))
-          ((org-clock-is-active) (cadr org-clock-history))
-          ((equal org-clock-default-task (car org-clock-history)) (cadr org-clock-history))
-          (t (car org-clock-history)))))
-    (widen)
-    (org-with-point-at clock-in-to-task
-      (org-clock-in nil))))
 
 (defun storax/org-is-project-p ()
   "Any task with a todo keyword subtask."
@@ -280,10 +182,12 @@ This is normally used by skipping functions where this variable is already local
 
 (defun storax/org-toggle-next-task-display ()
   (interactive)
-  (setq storax/org-hide-scheduled-and-waiting-next-tasks (not storax/org-hide-scheduled-and-waiting-next-tasks))
+  (setq storax/org-hide-scheduled-and-waiting-next-tasks
+        (not storax/org-hide-scheduled-and-waiting-next-tasks))
   (when  (equal major-mode 'org-agenda-mode)
     (org-agenda-redo))
-  (message "%s WAITING and SCHEDULED NEXT Tasks" (if storax/org-hide-scheduled-and-waiting-next-tasks "Hide" "Show")))
+  (message "%s WAITING and SCHEDULED NEXT Tasks"
+           (if storax/org-hide-scheduled-and-waiting-next-tasks "Hide" "Show")))
 
 (defun storax/org-skip-stuck-projects ()
   "Skip trees that are not stuck projects."
@@ -486,18 +390,6 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
             (or subtree-end (point-max)))
         next-headline))))
 
-(defun storax/org-display-inline-images ()
-  (condition-case nil
-      (org-display-inline-images)
-    (error nil)))
-
-(defun storax/org-save-then-publish (&optional force)
-  (interactive "P")
-  (save-buffer)
-  (org-save-all-org-buffers)
-  (let ((org-html-head-extra))
-    (org-publish-current-project force)))
-
 ;; Erase all reminders and rebuilt reminders for today from the agenda
 (defun storax/org-agenda-to-appt ()
   (interactive)
@@ -592,25 +484,205 @@ Late deadlines first, then scheduled, then non-late deadlines"
 (defun storax/org-is-scheduled-late (date-str)
   (string-match "Sched\.\\(.*\\)x:" date-str))
 
-(defvar storax/capture-history nil)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Clocking
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Org capture stuff
-(defun storax/capture-prompt (prompt variable)
-  "PROMPT for string, save it to VARIABLE and insert it."
-  (make-local-variable variable)
-  (set variable (read-string (concat prompt ": ") nil storax/capture-history)))
+(defvar storax/org-keep-clock-running nil)
 
-(defun storax/capture-insert (variable)
-  "Insert content of VARIABLE."
-  (symbol-value variable))
+(defun storax/org-clock-in-to-next (kw)
+  "Switch a task from KW TODO to NEXT when clocking in.
+Skips capture tasks, projects, and subprojects.
+Switch projects and subprojects from NEXT back to TODO"
+  (when (not (and (boundp 'org-capture-mode) org-capture-mode))
+    (cond
+     ((and (member (org-get-todo-state) (list "TODO"))
+           (storax/org-is-task-p))
+      "NEXT")
+     ((and (member (org-get-todo-state) (list "NEXT"))
+           (storax/org-is-project-p))
+      "TODO"))))
 
-(defun storax/capture-include (what text &rest fmtvars)
-  "Ask user to include WHAT.  If user agrees return TEXT."
-  (when (y-or-n-p (concat "Include " what "?"))
-    (apply 'format text fmtvars)))
+(defun storax/org-punch-in (arg)
+  "Start continuous clocking and set the default task to the selected task.
+If no task is selected set the Organization task as the default task."
+  (interactive "p")
+  (setq storax/org-keep-clock-running t)
+  (if (equal major-mode 'org-agenda-mode)
+      ;;
+      ;; We're in the agenda
+      ;;
+      (let* ((marker (org-get-at-bol 'org-hd-marker))
+             (tags (org-with-point-at marker (org-get-tags-at))))
+        (if (and (eq arg 4) tags)
+            (org-agenda-clock-in '(16))
+          (storax/org-clock-in-organization-task-as-default)))
+    ;;
+    ;; We are not in the agenda
+    ;;
+    (save-restriction
+      (widen)
+                                        ; Find the tags on the current task
+      (if (and (equal major-mode 'org-mode) (not (org-before-first-heading-p)) (eq arg 4))
+          (org-clock-in '(16))
+        (storax/org-clock-in-organization-task-as-default)))))
 
-(defalias 'oc/prmt 'storax/capture-prompt)
-(defalias 'oc/ins 'storax/capture-insert)
-(defalias 'oc/inc 'storax/capture-include)
+(defun storax/org-punch-out ()
+  (interactive)
+  (setq storax/org-keep-clock-running nil)
+  (when (org-clock-is-active)
+    (org-clock-out))
+  (org-agenda-remove-restriction-lock))
+
+(defun storax/org-clock-in-default-task ()
+  (save-excursion
+    (org-with-point-at org-clock-default-task
+      (org-clock-in))))
+
+(defun storax/org-clock-in-parent-task ()
+  "Move point to the parent (project) task if any and clock in."
+  (let ((parent-task))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (while (and (not parent-task) (org-up-heading-safe))
+          (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+            (setq parent-task (point))))
+        (if parent-task
+            (org-with-point-at parent-task
+              (org-clock-in))
+          (when storax/org-keep-clock-running
+            (storax/org-clock-in-default-task)))))))
+
+(defun storax/org-clock-in-organization-task-as-default ()
+  (interactive)
+  (org-with-point-at (org-id-find storax/org-organization-task-id 'marker)
+    (org-clock-in '(16))))
+
+(defun storax/org-clock-out-maybe ()
+  (when (and storax/org-keep-clock-running
+             (not org-clock-clocking-in)
+             (marker-buffer org-clock-default-task)
+             (not org-clock-resolving-clocks-due-to-idleness))
+    (storax/org-clock-in-parent-task)))
+
+(defun storax/org-clock-in-task-by-id (id)
+  "Clock in a task by ID."
+  (org-with-point-at (org-id-find id 'marker)
+    (org-clock-in nil)))
+
+(defun storax/org-clock-in-last-task (arg)
+  "Clock in the interrupted task if there is one.
+Skip the default task and get the next one.
+A prefix ARG forces clock in of the default task."
+  (interactive "p")
+  (let ((clock-in-to-task
+         (cond
+          ((eq arg 4) org-clock-default-task)
+          ((and (org-clock-is-active)
+                (equal org-clock-default-task (cadr org-clock-history)))
+           (caddr org-clock-history))
+          ((org-clock-is-active) (cadr org-clock-history))
+          ((equal org-clock-default-task (car org-clock-history)) (cadr org-clock-history))
+          (t (car org-clock-history)))))
+    (widen)
+    (org-with-point-at clock-in-to-task
+      (org-clock-in nil))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Misc
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun storax/org-buffers ()
+  "Return a list of org buffers."
+  (let (buffers)
+    (dolist (b (buffer-list))
+      (when (with-current-buffer b (equal major-mode 'org-mode))
+        (add-to-list 'buffers (buffer-name b))))
+    buffers))
+
+(defun storax/org-hide-other ()
+  (interactive)
+  (save-excursion
+    (org-back-to-heading 'invisible-ok)
+    (hide-other)))
+
+(defun storax/org-display-inline-images ()
+  (condition-case nil
+      (org-display-inline-images)
+    (error nil)))
+
+(defun storax/org-source-file ()
+  "Create a nice abbreviation for the current file."
+  (let ((prjname (projectile-project-name))
+        (fullfile (buffer-file-name)))
+    (if (eq prjname "-")
+        fullfile
+      (format
+       "%s:%s" prjname
+       (substring
+        fullfile (+ (cl-search prjname fullfile) (length prjname) 1)
+        (length fullfile))))))
+
+(defun storax/org-insert-source-link ()
+      "Create a source link to the current line in the file."
+      (interactive)
+      (let ((srcfile (storax/org-source-file))
+            (fullfile (buffer-file-name))
+            (lineno (line-number-at-pos
+                     (if (region-active-p)
+                         (region-beginning)
+                       (point))))
+            (lineendno (line-number-at-pos
+                        (if (region-active-p)
+                            (region-end)
+                          (point))))
+            (orgbufs (storax/org-buffers))
+            selectedbuf
+            linestr)
+        (if (equal lineno lineendno)
+            (setq linestr (format "l.%s" lineno))
+          (setq linestr (format "l.%s-l.%s" lineno lineendno)))
+        (unless orgbufs
+          (add-to-list
+           'orgbufs
+           (get-buffer-create (read-from-minibuffer "No org buffer found. New buffer name: ")))
+          (with-current-buffer (car orgbufs)
+            (org-mode)))
+        (if (> (length orgbufs) 1)
+            (setq selectedbuf
+                  (completing-read
+                   "Choose buffer to insert link: "
+                   orgbufs nil t nil
+                   'storax/org-source-link-file-hist))
+          (setq selectedbuf (car orgbufs)))
+        (switch-to-buffer-other-window selectedbuf)
+        (goto-char (point-max))
+        (unless (eq (point) (line-beginning-position))
+          (newline))
+        (org-insert-heading)
+        (insert (org-make-link-string
+                 (format "file:%s::%s" fullfile lineno)
+                 (format "%s:%s" srcfile linestr)))
+        (insert "\n")))
+
+(defun storax/org-find-project-task ()
+  "Move point to the parent (project) task if any."
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
+      (while (org-up-heading-safe)
+        (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+          (setq parent-task (point))))
+      (goto-char parent-task)
+      parent-task)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Rifle
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun storax/org-rifle-agenda ()
+  "Rifle through Org files in agenda files."
+  (interactive)
+  (helm-org-rifle-files (org-agenda-files)))
 
 ;;; funcs.el ends here

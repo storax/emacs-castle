@@ -28,6 +28,7 @@ values."
      auto-completion
      better-defaults
      ;;django
+     deft
      emacs-lisp
      erc
      git
@@ -379,6 +380,7 @@ layers configuration. You are free to put any user code."
      (:name "drafts" :query "tag:draft" :key "d")
      (:name "all mail" :query "*" :key "a")
      (:name "mpc" :query "tag:mpc" :key "m"))))
+ '(org-agenda-files (quote ("~/Documents/org/todo.org")))
  '(send-mail-function (quote sendmail-send-it)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
