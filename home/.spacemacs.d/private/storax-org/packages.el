@@ -17,7 +17,7 @@
   (concat (file-name-directory load-file-name) "org-page-themes"))
 
 (defconst storax-org-packages
-  '(org orgbox ox-rst org-page helm-org-rifle deft ox-jira))
+  '(org orgbox ox-rst org-page helm-org-rifle deft ox-jira org-alert))
 
 (defun storax-org/init-orgbox ()
   (use-package orgbox))
@@ -27,6 +27,15 @@
 
 (defun storax-org/init-ox-jira ()
   (use-package ox-jira))
+
+(defun storax-org/init-org-alert ()
+  (use-package org-alert
+    :init
+    (progn
+      (setq alert-default-style 'libnotify))
+    :config
+    (progn
+      (org-alert-enable))))
 
 (defun storax-org/setup-org ()
   (setq org-modules
