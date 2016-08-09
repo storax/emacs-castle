@@ -293,17 +293,18 @@
         org-plantuml-jar-path "~/programms/java/plantuml.jar"
         org-src-window-setup 'current-window
         org-babel-default-header-args '((:session . "none")
-                                        (:results . "output verbatim replace raw")
-                                        (:exports . "code")
+                                        (:results . "output verbatim raw replace")
+                                        (:exports . "both")
                                         (:cache . "no")
                                         (:noweb . "no")
                                         (:hlines . "no")
                                         (:tangle . "no")
-                                        (:wrap . "RESULTS"))
+                                        (:wrap "EXAMPLE"))
 
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         ;; Export
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        org-export-babel-evaluate nil
         ;; Do not use sub or superscripts - I currently don't need this functionality in my documents
         org-export-with-sub-superscripts nil
         ;; Do not generate internal css formatting for HTML exports
