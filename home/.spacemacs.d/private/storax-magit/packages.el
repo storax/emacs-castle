@@ -34,6 +34,31 @@
 
 (defun storax-magit/post-init-magit ()
   (use-package magit
-    :bind ("C-x g" . magit-status)))
+    :bind ("C-x g" . magit-status)
+    :init
+    (spacemacs/set-leader-keys "g SPC" 'magit-list-repositories)
+    :config
+    (progn
+      (defun magit-list-repositories ()
+        "Display a list of repositories.
+
+Use the options `magit-repository-directories'
+and `magit-repository-directories-depth' to
+control which repositories are displayed."
+        (interactive)
+        (with-current-buffer (get-buffer-create "*Magit Repositories*")
+          (magit-repolist-mode)
+          (setq tabulated-list-entries
+                (mapcar (-lambda ((id . path))
+                          (let ((default-directory path))
+                            (list path
+                                  (vconcat (--map (or (funcall (nth 2 it) id) "")
+                                                  magit-repolist-columns)))))
+                        (magit-list-repos-uniquify
+                         (--map (cons (file-name-nondirectory (directory-file-name it))
+                                      (file-name-as-directory it))
+                                (magit-list-repos)))))
+          (tabulated-list-print)
+          (switch-to-buffer (current-buffer)))))))
 
 ;;; packages.el ends here

@@ -371,6 +371,10 @@ layers configuration. You are free to put any user code."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(desktop-auto-save-timeout nil)
+ '(magit-repository-directories
+   (quote
+    (("/home/david/projects/" . 1)
+     ("/home/david/.homesick/repos/" . 1))))
  '(notmuch-saved-searches
    (quote
     ((:name "inbox" :query "tag:inbox" :key "i")
