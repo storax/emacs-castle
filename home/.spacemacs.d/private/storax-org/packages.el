@@ -16,6 +16,15 @@
 (defvar storax-org-pages-theme-dir
   (concat (file-name-directory load-file-name) "org-page-themes"))
 
+(defvar storax-org-java-dir
+  (concat (file-name-directory load-file-name) "java/"))
+
+(defvar storax-plantuml-jar
+  (concat storax-org-java-dir "plantuml.jar"))
+
+(defvar storax-ditaa-jar
+  (concat storax-org-java-dir "ditaa.jar"))
+
 (defconst storax-org-packages
   '(org orgbox ox-rst org-page helm-org-rifle deft ox-jira org-alert))
 
@@ -289,17 +298,32 @@
         ;; Babel
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         org-confirm-babel-evaluate t
-        ;;TODO org-ditaa-jar-path "~/git/org-mode/contrib/scripts/ditaa.jar"
-        org-plantuml-jar-path "~/programms/java/plantuml.jar"
+        org-ditaa-jar-path storax-ditaa-jar
+        org-plantuml-jar-path storax-plantuml-jar
         org-src-window-setup 'current-window
         org-babel-default-header-args '((:session . "none")
-                                        (:results . "output verbatim raw replace")
-                                        (:exports . "both")
+                                        (:results . "replace")
+                                        (:exports . "code")
                                         (:cache . "no")
                                         (:noweb . "no")
                                         (:hlines . "no")
-                                        (:tangle . "no")
-                                        (:wrap "EXAMPLE"))
+                                        (:tangle . "no"))
+
+        org-babel-default-header-args:python '((:results . "output verbatim raw replace")
+                                               (:exports . "both")
+                                               (:wrap . "EXAMPLE"))
+        org-babel-default-header-args:ruby '((:results . "output verbatim raw replace")
+                                             (:exports . "both")
+                                             (:wrap . "EXAMPLE"))
+        org-babel-default-header-args:sh '((:results . "output verbatim raw replace")
+                                           (:exports . "both")
+                                           (:wrap . "EXAMPLE"))
+        org-babel-default-header-args:emacs-lisp '((:results . "output verbatim raw replace")
+                                                   (:exports . "both")
+                                                   (:wrap . "EXAMPLE"))
+        org-babel-default-header-args:clojure '((:results . "output verbatim raw replace")
+                                                (:exports . "both")
+                                                (:wrap . "EXAMPLE"))
 
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         ;; Export
@@ -338,10 +362,10 @@
      (gnuplot . t)
      (clojure . t)
      (sh . t)
-     (ledger . t)
      (org . t)
      (plantuml . t)
-     (latex . t)))
+     (latex . t)
+     (sql . t)))
 
   (add-to-list 'org-src-lang-modes '("plantuml" . fundamental))
   ;; Resume clocking task when emacs is restarted
