@@ -13,7 +13,7 @@
 
 ;;; Code:
 (defconst storax-python-packages
-  '(python pyvenv electric-operator helm) "The list of Lisp packages required by the storax-smartparens layer.")
+  '(python pyvenv electric-operator smartparens) "The list of Lisp packages required by the storax-smartparens layer.")
 
 (defun storax-python/post-init-pyvenv ()
   (use-package pyvenv
@@ -53,7 +53,15 @@
     (bind-key "C-c C-p" 'storax/previous-error-wrapped python-mode-map)
     (bind-key "M-n" 'python-nav-forward-block python-mode-map)
     (bind-key "M-p" 'python-nav-backward-block python-mode-map)
-    (bind-key "C-c C-o" 'python-helm-occur python-mode-map)
+    (bind-key "C-M-f" 'python-nav-forward-sexp python-mode-map)
+    (bind-key "C-M-b" 'python-nav-backward-sexp python-mode-map)
+    (bind-key "C-M-n" 'python-nav-forward-defun python-mode-map)
+    (bind-key "C-M-p" 'python-nav-backward-defun python-mode-map)
+    (bind-key "M-a" 'python-nav-beginning-of-statement python-mode-map)
+    (bind-key "M-e" 'python-nav-end-of-statement python-mode-map)
+    (bind-key "C-M-a" 'python-nav-beginning-of-block python-mode-map)
+    (bind-key "C-M-e" 'python-nav-end-of-block python-mode-map)
+
     (spacemacs/set-leader-keys-for-major-mode 'python-mode
       "d SPC" 'storax/pdb-break
       "dU" 'storax/pdb-until
@@ -109,30 +117,10 @@ if not inside any parens."
     (electric-operator-add-rules-for-mode 'python-mode (cons ":" #'storax/python-mode-:))
     (add-hook 'python-mode-hook #'electric-operator-mode)))
 
-(defun storax-python/post-init-helm ()
-  (use-package helm
-    :defer t
+(defun storax-python/post-init-smartparens ()
+  (use-package smartparens
     :config
-    (defun storax/python-helm-occur ()
-      "Preconfigured helm for Occur."
-      (interactive)
-      (helm-occur-init-source)
-      (let ((bufs (list (buffer-name (current-buffer)))))
-        (helm-attrset 'follow 1 helm-source-occur)
-        (helm-attrset 'follow 1 helm-source-moccur)
-        (helm-attrset 'moccur-buffers bufs helm-source-occur)
-        (helm-set-local-variable 'helm-multi-occur-buffer-list bufs)
-        (helm-set-local-variable
-         'helm-multi-occur-buffer-tick
-         (cl-loop for b in bufs
-                  collect (buffer-chars-modified-tick (get-buffer b)))))
-      (helm :sources 'helm-source-occur
-            :buffer "*helm occur*"
-            :history 'helm-occur-history
-            :input "^[[:space:]]*\\(def\\|class\\)[[:space:]] "
-            :preselect (and (memq 'helm-source-occur helm-sources-using-default-as-input)
-                            (format "%s:%d:" (regexp-quote (buffer-name))
-                                    (line-number-at-pos (point))))
-            :truncate-lines helm-moccur-truncate-lines))))
+    (unbind-key "C-M-n" smartparens-mode-map)
+    (unbind-key "C-M-p" smartparens-mode-map)))
 
 ;;; packages.el ends here
