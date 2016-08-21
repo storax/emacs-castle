@@ -381,6 +381,7 @@ layers configuration. You are free to put any user code."
      (:name "all mail" :query "*" :key "a")
      (:name "mpc" :query "tag:mpc" :key "m"))))
  '(org-agenda-files (quote ("~/Documents/org/todo.org")))
+ '(paradox-github-token t)
  '(send-mail-function (quote sendmail-send-it)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

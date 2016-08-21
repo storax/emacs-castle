@@ -59,7 +59,7 @@
         org-read-date-prefer-future 'time
         org-cycle-include-plain-lists t
         org-yank-adjusted-subtrees t
-        org-global-properties  '(("Effort_ALL" . "0:15 0:30 0:45 1:00 2:00 3:00 4:00 5:00 6:00 0:00")
+        org-global-properties  '(("EFFORT_ALL" . "0:15 0:30 0:45 1:00 2:00 3:00 4:00 5:00 6:00 0:00")
                                  ("STYLE_ALL" . "habit"))
 
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -319,37 +319,14 @@
         '(("html" . "")
           ("was-html" . "<?xml version=\"1.0\" encoding=\"%s\"?>")
           ("php" . "<?php echo \"<?xml version=\\\"1.0\\\" encoding=\\\"%s\\\" ?>\"; ?>"))
-        org-html-head (storax/org-rtd-template-html-header)
+        org-html-head (storax/org-rtd-template-html-header))
 
-        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-        ;; PUBLISH
-        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-        org-publish-project-alist
-        `(;; Miscellaneous pages for other websites
-          ;; org are the org-files that generate the content
-          ("org-org"
-           :base-directory "~/Documents/org/"
-           :publishing-directory "~/Documents/org-publish"
-           :recursive t
-           :section-numbers nil
-           :table-of-contents nil
-           :base-extension "org"
-           :plain-source t
-           :htmlized-source t
-           :html-head ,(storax/org-rtd-template-html-header)
-           :publishing-function org-html-publish-to-html
-           :style-include-default nil
-           :author-info t
-           :creator-info t)
-          ("org-extra"
-           :base-directory "~/Documents/org/"
-           :publishing-directory "~/Documents/org-publish"
-           :base-extension "pdf\\|png\\|jpg\\|gif"
-           :publishing-function org-publish-attachment
-           :recursive t
-           :author nil)
-          ("org"
-           :components ("org-org" "org-extra"))))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; PUBLISH
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  ;; empty
 
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -421,7 +398,11 @@
         (run-at-time "24:01" nil 'storax/org-agenda-to-appt)
         (run-at-time "06:00" 86400 '(lambda () (setq org-habit-show-habits t)))
         (run-at-time "00:59" 3600 'org-save-all-org-buffers)
-        (org-babel-lob-ingest storax-org-lob-file))))
+        (org-babel-lob-ingest storax-org-lob-file)))
+    (use-package ox-publish
+      :config
+      (progn
+        (storax/add-publish-project "org" "~/Documents/org/" "~/Documenst/org-publish/"))))
 
 (defun storax-org/init-org-page ()
   (use-package org-page

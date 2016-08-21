@@ -61,6 +61,37 @@
   (with-temp-buffer
     (insert-file-contents storax-org-rtd-template)
     (buffer-string)))
+
+(defun storax/add-publish-project (name basedir publishdir)
+  "Add a publish project."
+  (interactive (list (read-string "Project Name: ")
+                     (read-directory-name "Project Base Directory: ")
+                     (read-directory-name "Project Publish Directory: ")))
+  (add-to-list 'org-publish-project-alist
+               `(,(concat name "-org")
+                 :base-directory ,basedir
+                 :publishing-directory ,publishdir
+                 :recursive t
+                 :section-numbers nil
+                 :table-of-contents nil
+                 :base-extension "org"
+                 :plain-source t
+                 :htmlized-source t
+                 :html-head ,(storax/org-rtd-template-html-header)
+                 :publishing-function org-html-publish-to-html
+                 :style-include-default nil
+                 :author-info t
+                 :creator-info t))
+  (add-to-list 'org-publish-project-alist
+               `(,(concat name "-media")
+                 :base-directory ,basedir
+                 :publishing-directory ,publishdir
+                 :recursive t
+                 :base-extension "pdf\\|png\\|jpg\\|gif"
+                 :publishing-function org-publish-attachment
+                 :author nil))
+  (add-to-list 'org-publish-project-alist
+               `(,name :components (,(concat name "-org") ,(concat name "-media")))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Refile
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
