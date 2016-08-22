@@ -18,6 +18,8 @@
 
 (defun storax-yasnippet/post-init-yasnippet ()
   (use-package yasnippet
+    :init
+    (add-to-list 'warning-suppress-types '(yasnippet backquote-change))
     :config
     (progn
       ;; Put spacemacs snippets to the front
