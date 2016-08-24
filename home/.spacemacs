@@ -120,7 +120,7 @@ values."
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(org-tfl)
    ;; A list of packages and/or extensions that will not be install and loaded.
-   dotspacemacs-excluded-packages '(vi-tilde-fringe helm-gitignore)
+   dotspacemacs-excluded-packages '(vi-tilde-fringe helm-gitignore org-alert)
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
    ;; are declared in a layer which is not a member of
    ;; the list `dotspacemacs-configuration-layers'. (default t)
@@ -321,7 +321,7 @@ in `dotspacemacs/user-config'."
         vs-follow-symlinks t ; When following sysmlinks always go to the destination
         require-final-newline t
         indicate-empty-lines t)
-  )
+  (add-to-list 'load-path (concat dotspacemacs-directory "elisp")))
 
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
