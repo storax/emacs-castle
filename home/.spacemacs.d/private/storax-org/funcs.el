@@ -708,6 +708,14 @@ A prefix ARG forces clock in of the default task."
       (goto-char parent-task)
       parent-task)))
 
+(defun storax/org-screenshot (filename &optional size)
+  "Save a screenshot to FILENAME and resize it to SIZE."
+  (interactive "FFilename: \nsResize: ")
+  (call-process "import" nil nil nil filename)
+  (call-process "convert" nil nil nil filename "-resize" size filename)
+  (insert (concat "[[" filename "]]"))
+  (storax/org-display-inline-images))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Rifle
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
