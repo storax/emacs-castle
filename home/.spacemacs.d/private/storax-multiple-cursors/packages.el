@@ -27,8 +27,11 @@
              ("C-M-<" . mc/unmark-previous-like-this)
              ("C-c C-c C->" . mc/mark-all-like-this))
       :init
-      (spacemacs/set-leader-keys "eml" 'mc/edit-lines)
-      (spacemacs/set-leader-keys "ema" 'mc/mark-all-like-this)))
+      (progn
+        (spacemacs/declare-prefix "e" "errors/edit" "errors/edit")
+        (spacemacs/declare-prefix "em" "multiple-cursors" "multiple-cursors")
+        (spacemacs/set-leader-keys "eml" 'mc/edit-lines)
+        (spacemacs/set-leader-keys "ema" 'mc/mark-all-like-this))))
 
 
 ;;; packages.el ends here

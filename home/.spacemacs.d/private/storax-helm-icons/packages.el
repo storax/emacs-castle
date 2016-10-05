@@ -13,7 +13,7 @@
 
 ;;; Code:
 
-(defconst storax-helm-packages
+(defconst storax-helm-icons-packages
   '(helm))
 
 (defun storax-helm-icons/post-init-helm ()

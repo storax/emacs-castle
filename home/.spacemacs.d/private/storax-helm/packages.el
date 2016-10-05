@@ -19,8 +19,7 @@
 (defun storax-helm/post-init-helm ()
   (use-package helm
     :defer t
-    :bind (("M-y" . helm-show-kill-ring)
-           ("C-x C-f" . helm-find-files)
+    :bind (("C-x C-f" . helm-find-files)
            ("C-x C-h C-i" . helm-imenu)
            ("C-x b" . helm-mini))
     :init
