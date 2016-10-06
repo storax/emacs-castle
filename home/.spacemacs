@@ -332,13 +332,6 @@ layers configuration. You are free to put any user code."
     :defer t
     :config
     (setq reb-re-syntax 'string))
-  ;; Oldschool fringe
-  (use-package fringe-helper
-    :config
-    (fringe-helper-define 'storax-empty-line '(top repeat)
-      "..XXXX.."
-      "........")
-    (add-to-list 'fringe-indicator-alist '(empty-line . storax-empty-line)))
   ;; isearch
   (use-package isearch
     :defer t
