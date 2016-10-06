@@ -20,6 +20,7 @@
   (use-package helm
     :defer t
     :bind (("C-x C-f" . helm-find-files)
+           ;("M-y" . helm-show-kill-ring)
            ("C-x C-h C-i" . helm-imenu)
            ("C-x b" . helm-mini))
     :init

@@ -75,7 +75,6 @@ values."
      storax-unkillable-scratch
      storax-ace-window
      storax-avy
-     storax-desktop
      storax-popup
      storax-dabbrev
      storax-expand-region
