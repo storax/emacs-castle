@@ -19,12 +19,8 @@
 (defun storax-drag-stuff/init-drag-stuff ()
   (use-package drag-stuff
     :config
-    (drag-stuff-global-mode t)))
-
-;; (defun storax-drag-stuff/post-init-diminish ()
-;;   (use-package diminish
-;;     :init
-;;       (with-eval-after-load 'drag-stuff
-;;        (diminish 'drag-stuff-mode))))
+    (progn
+      (diminish 'drag-stuff-mode)
+      (drag-stuff-global-mode t))))
 
 ;;; packages.el ends here
