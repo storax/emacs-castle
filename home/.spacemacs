@@ -326,8 +326,8 @@ in `dotspacemacs/user-config'."
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
-  ;; nicer regexp syntax
   (ido-mode -1)
+  ;; nicer regexp syntax
   (use-package re-builder
     :defer t
     :config
@@ -348,6 +348,15 @@ layers configuration. You are free to put any user code."
       (interactive)
       (kill-new isearch-string))
     (bind-key "M-w" 'storax/isearch-kill isearch-mode-map))
+  ;; layouts
+  (spacemacs|define-custom-layout "@Spacemacs"
+    :binding "e"
+    :body
+    (spacemacs/find-dotfile)
+    (persp-add-buffer
+     (find-file-noselect "~/.spacemacs.d/private/storax-org/packages.el"))
+    (persp-add-buffer ".spacemacs"))
+
   (bind-key "C-x C-k" 'kill-buffer)
   ;; Builtin Auto Modes
   (add-to-list 'auto-mode-alist '("\\.qss$" . css-mode))
@@ -359,8 +368,7 @@ layers configuration. You are free to put any user code."
   (setq helm-M-x-fuzzy-match nil
         helm-buffers-fuzzy-matching nil
         helm-recentf-fuzzy-match nil
-        undo-tree-visualizer-diff nil)
-  )
+        undo-tree-visualizer-diff nil))
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
