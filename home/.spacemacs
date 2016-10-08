@@ -117,7 +117,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(org-tfl)
+   dotspacemacs-additional-packages '(org-tfl rainbow-mode)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '(vi-tilde-fringe helm-gitignore org-alert)
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
