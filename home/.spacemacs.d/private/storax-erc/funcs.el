@@ -23,6 +23,6 @@
 (defun storax-erc/erc-freenode ()
   "Login to irc.freenode.net."
   (interactive)
-  (erc :server "irc.freenode.net" :port "6667" :nick "notZubes")))
+  (erc :server "irc.freenode.net" :port "6667" :nick "notZubes"))
 
 ;;; funcs.el ends here
