@@ -13,8 +13,6 @@
 
 ;;; Code:
 
-(configuration-layer/declare-layer 'storax-icons)
-
 (defvar storax/major-mode-icon-list
   (list
    '("lisp-mode" emacs-lisp-mode-hook storax/icon-el)

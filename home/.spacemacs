@@ -30,7 +30,7 @@ values."
      ;;django
      deft
      emacs-lisp
-     erc
+     (erc :packages (not persp-mode))
      git
      github
      html
@@ -371,6 +371,7 @@ layers configuration. You are free to put any user code."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(desktop-auto-save-timeout nil)
+ '(erc-nickserv-identify-mode nil)
  '(magit-repository-directories
    (quote
     (("/home/david/projects/" . 1)

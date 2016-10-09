@@ -14,12 +14,13 @@
 ;;; Code:
 
 (defconst storax-erc-packages
-  '(erc))
+  '(erc persp-mode))
 
 (defun storax-erc/post-init-erc ()
   (use-package erc
     :init
     (spacemacs/set-leader-keys "aig" 'storax-erc/erc-gitter)
+    (spacemacs/set-leader-keys "aif" 'storax-erc/erc-freenode)
     :config
     (setq erc-server "irc.gitter.im"
           erc-modules
@@ -45,10 +46,25 @@
             track
             youtube)
           erc-autojoin-channels-alist
-          '(("irc.gitter.im" . ("magit/magit"
-                                "syl20bnr/spacemacs"
-                                "signalpillar/chat-with-storax"))
-            ("irc.freenode.net" . ("#bitches"))))))
+          '(("irc\.gitter\.im" "magit/magit" "syl20bnr/spacemacs" "signalpillar/chat-with-storax")
+            (".*freenode.*" "#bitches")))))
 
+(defun storax-erc/post-init-persp-mode ()
+  (with-eval-after-load 'persp-mode
+    (push (lambda (b) (with-current-buffer b (eq major-mode 'erc-mode)))
+          persp-filter-save-buffers-functions))
 
+  (spacemacs|define-custom-layout "@ERC"
+    :binding "E"
+    :body
+    (progn
+      (defun spacemacs-layouts/add-erc-buffer-to-persp ()
+        (persp-add-buffer (current-buffer)
+                          (persp-get-by-name
+                           "@ERC")))
+      (add-hook 'erc-mode-hook #'spacemacs-layouts/add-erc-buffer-to-persp)
+      (if erc-server-list
+          (erc/default-servers)
+        (call-interactively 'storax-erc/erc-gitter))
+      (erc :server "irc.freenode.net" :nick "notZubes"))))
 ;;; packages.el ends here

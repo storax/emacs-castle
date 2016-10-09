@@ -44,23 +44,69 @@ SYMBOLS should be a list the length of the interactive args of FUNC.
             ,@body)))
 
 (defmacro lame/task (taskname description &rest body)
-  "Create a task with TASKNAME and DESCRIPTION and execute BODY.
-The task is marked as finished after calling `lame/done'."
+  "Create a task called TASKNAME.
+
+Create a task buffer to track the progress.
+The initial DESCRIPTION is inserted.
+Execute BODY as the task.
+The task is marked as finished after calling `lame/done'"
   (declare (indent 1))
-  `(let ((taskbuffername (format "Task: %s" ,taskname)))
-     (when (or (not lame-task) (y-or-n-p "Cancel currently running task?"))
-       (display-buffer (get-buffer-create taskbuffername) '(display-buffer-reuse-window))
-       (setq lame-task ,taskname
-             lame-task-buffer (get-buffer taskbuffername)
-             lame-continue-callback nil)
-       (with-current-buffer lame-task-buffer
-         (setq buffer-read-only t)
-         (let ((inhibit-read-only t))
-           (org-mode)
-           (goto-char (point-max))
-           (org-insert-heading nil nil t)
-           (insert (format "Task: %s\n%s" ,taskname ,description))))
-       ,@body)))
+  `(when (lame//cancel-current-task-p)
+     (when lame-task-buffer
+       (kill-buffer lame-task-buffer))
+     (lame//reset)
+     (lame//prepare-task-buffer (taskname description))
+     ,@body))
+
+(defun lame//cancel-current-task-p ()
+  "Check if a task is currently running.
+If a task is running, ask the user to cancel the current task
+then the decision of the user is returned.
+If no task is running t is returned."
+  (or (not lame-task) (y-or-n-p "Cancel currently running task? ")))
+
+(defun lame//prepare-task-buffer (taskname description)
+  "Create a buffer to capture the progress of task called TASKNAME.
+Insert the given DESCRIPTION of the task in the buffer."
+  (let* ((taskbuffername (lame//get-task-buffer-name taskname))
+         (buffer (get-buffer-create taskbuffername)))
+    (with-current-buffer buffer
+      (setq buffer-read-only t)
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (org-mode)
+        (lame//initial-buffer-contents taskname description)))
+    (setq lame-task-buffer buffer)))
+
+(defun lame//reset ()
+  "Clear all lame global variables.
+Reset the following variables:
+LAME-TASK
+LAME-TASK-BUFFER
+LAME_CONTINUE-CALLBACK"
+  (setq lame-task nil
+        lame-task-buffer nil
+        lame-continue-callback nil))
+
+(defun lame//format-task-buffer-name (taskname)
+  "Return a formated buffer name for the given TASKNAME."
+  (format "Task: %s" taskname))
+
+(defun lame//initial-buffer-contents (taskname description)
+  "Fill the buffer with the initial contents.
+E.g. title for the given TASKNAME and DESCRIPTION."
+  (org-insert-heading nil nil t)
+  (insert (concat
+           (lame//format-task-title taskname) "\n"
+           (lame//format-task-description description))))
+
+(defun lame//format-task-title (taskname)
+  "Return a formatted task title for the given TASKNAME."
+  (format "Task: %s" taskname))
+
+(defun lame//format-task-description (description)
+  "Return a formatted text for the given DESCRIPTION."
+  description)
 
 (defmacro lame/step (stepname description &rest body)
   "A step with STEPNAME of a task.
@@ -86,9 +132,7 @@ Then execute BODY."
 (defun lame/done ()
   "Call when you are done with the current task."
   (message "Task %s completed!" lame-task)
-  (setq lame-task nil
-        lame-continue-callback nil
-        lame-task-buffer nil))
+  (lame//reset))
 
 (defmacro lame/defer (before after)
   "Evaluate BEFORE and return it's return value.

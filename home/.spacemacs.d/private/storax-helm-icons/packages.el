@@ -21,7 +21,6 @@
     :defer t
     :init
     (progn
-      (configuration-layer/declare-layer 'storax-icons)
       (defvar storax/helm-file-icons
         (list
          `("py" . ,storax/icon-python)

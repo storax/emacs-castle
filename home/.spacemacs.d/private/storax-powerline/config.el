@@ -13,8 +13,6 @@
 
 ;;; Code:
 
-(configuration-layer/declare-layer 'storax-icons)
-
 (defvar storax-powerline/imgdir
   (file-name-as-directory (concat (file-name-directory load-file-name) "images")))
 
