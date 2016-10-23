@@ -48,7 +48,7 @@
   name description)
 
 (cl-defstruct lame-step
-  name description)
+  name description nodoc)
 
 (defvar lame-continue-callback nil
   "Callback function continue current lame session.")
@@ -67,6 +67,7 @@
 
 (defvar lame-process nil
   "The current running lame process.")
+
 (defun lame/interactive-args (func)
   "Get the interactive args of FUNC."
   (advice-eval-interactive-spec (cadr (interactive-form func))))
@@ -94,7 +95,7 @@ Create a task buffer to track the progress.
 The initial DESCRIPTION is inserted.
 Execute PREPARATION then ask the user to execute the task.
 Once the user continues, execute TASK.
-The task is marked as finished after calling `lame/done'"
+The task is marked as finished after calling `lame/done'."
   (declare (indent 0))
   `(when (lame//cancel-current-task-p)
      (when lame-task-buffer
@@ -190,33 +191,44 @@ It's called with OBJECT and STATUS."
 
 (defun lame//set-step-status (step status)
   "For the given STEP set the STATUS."
-  (lame//set-status step status 'lame//format-step-title))
+  (unless (lame-step-nodoc step)
+    (lame//set-status step status 'lame//format-step-title)))
 
 (cl-defmacro lame/step (&key (name "Unnamed Step")
                              description
                              preparation
-                             step)
+                             step
+                             silent
+                             nodoc)
   "A step with NAME of a task.
 Add DESCRIPTION to the `lame-task-buffer'.
 Then execute preparation.
+If SILENT is non-nil, don't show the task buffer,
+and immediately continue.
+If NODOC is non-nil, don't add text to the task buffer.
+NODOC implies SILENT.
 When the user continues execute step."
   (declare (indent 0))
   `(progn
      (when lame-current-step
        (lame//set-step-status lame-current-step lame-done-keyword))
-     (display-buffer lame-task-buffer '(display-buffer-reuse-window))
+     (unless (or ,silent ,nodoc)
+       (display-buffer lame-task-buffer '(display-buffer-reuse-window)))
      (with-current-buffer lame-task-buffer
-       (setq lame-current-step (make-lame-step :name ,name :description ,description))
-       (let ((inhibit-read-only t)
-             (desc ,description)
-             (title (lame//format-step-title lame-current-step lame-current-step-keyword)))
-         (goto-char (point-max))
-         (org-insert-heading nil nil t)
-         (org-demote)
-         (insert (concat title (when desc "\n") desc))))
-     (lame/defer
-       :before ,preparation
-       :after ,step)))
+       (setq lame-current-step (make-lame-step :name ,name :description ,description :nodoc ,nodoc))
+       (unless ,nodoc
+         (let ((inhibit-read-only t)
+               (desc ,description)
+               (title (lame//format-step-title lame-current-step lame-current-step-keyword)))
+           (goto-char (point-max))
+           (org-insert-heading nil nil t)
+           (org-demote)
+           (insert (concat title (when desc "\n") desc)))))
+     (if (or ,silent ,nodoc)
+         (progn ,preparation ,step)
+       (lame/defer
+         :before ,preparation
+         :after ,step))))
 
 (defun lame/continue ()
   "Continue the current lame session."
@@ -224,12 +236,14 @@ When the user continues execute step."
   (when lame-continue-callback
     (funcall lame-continue-callback)))
 
-(defun lame/done ()
+(cl-defun lame/done (&key killbuf)
   "Call when you are done with the current task."
   (message "Task %s completed!" (lame-task-name lame-current-task))
   (when lame-current-step
     (lame//set-step-status lame-current-step lame-done-keyword))
   (lame//set-task-status lame-current-task lame-done-keyword)
+  (when killbuf
+    (kill-buffer lame-task-buffer))
   (lame//reset))
 
 (cl-defmacro lame/defer (&key before after)
@@ -413,12 +427,13 @@ working directory."
 WRAP by default in EXAMPLE block.
 Use LANG if non-nil.
 If ansi is non-nil, apply ansi color codes first."
-  (lame/add-text-to-description
-    (with-current-buffer (process-buffer lame-process)
-      (if ansi
-          (ansi-color-apply (buffer-string))
-        (buffer-string)))
-    :wrap wrap :lang lang))
+  (when (and lame-process (process-buffer lame-process))
+    (lame/add-text-to-description
+      (with-current-buffer (process-buffer lame-process)
+        (if ansi
+            (ansi-color-apply (buffer-string))
+          (buffer-string)))
+      :wrap wrap :lang lang)))
 
 (defun lame-test ()
   "Test lame functions."
@@ -433,6 +448,7 @@ If ansi is non-nil, apply ansi color codes first."
         (lame/add-text-to-description "Execute steps")
         (lame/step
           :name "Edit text"
+          :silent t
           :description "Edit some example test."
           :step
           (lame/edit-text
@@ -458,6 +474,7 @@ If ansi is non-nil, apply ansi color codes first."
                         (lame/add-process-output :ansi t)
                         (lame/step
                           :name "Finish task"
+                          :nodoc t
                           :description "We end this task."
                           :step (lame/done))))))))))))))
 
