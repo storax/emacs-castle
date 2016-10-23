@@ -14,10 +14,10 @@
 ;;; Code:
 
 (defconst storax-unkillable-scratch-packages
-  '(unkillaple-scratch)
+  '(unkillable-scratch)
   "The list of Lisp packages required by the storax-unkillable-scratch layer.")
 
-(defun storax-unkillable-scratch/init-package ()
+(defun storax-unkillable-scratch/init-unkillable-scratch ()
     "Initialize unkillable-scratch"
   (unkillable-scratch 1))
 
