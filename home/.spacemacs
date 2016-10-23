@@ -94,14 +94,14 @@ values."
      (storax-dash
       :variables
       storax/docsets-to-install
-      '("Ansible" "Bash" "Boost" "C" "C++" "CMake" "Chef" "Common_Lisp"
+      '("Ansible" "Bash" "Boost" "C" "C++" "CMake" "Chef" "Common_Lisp" "Clojure"
         "Django" "Docker" "ElasticSearch" "Emacs_Lisp" "Flask" "Jinja"
         "LaTeX" "PostgreSQL" "Python_2" "Python_3" "SQLAlchemy"
         "Vagrant" ("Qt_4" . "Qt") ("Emacs" . "emacs"))
       storax/user-docsets-to-install
       '("Alembic" "Packer" "PyMel" "Requests" "Sphinx")
       storax/dash-common-docsets
-      '("Bash" "Common Lisp" "Emacs Lisp" "Packer" "Python 2" "Python 3"
+      '("Bash" "Common Lisp" "Clojure" "Emacs Lisp" "Packer" "Python 2" "Python 3"
         "Qt" "Requests" "Sphinx" "Vagrant" "emacs"))
      storax-visual-regexp-steroids
      ;; storax-major-mode-icons
