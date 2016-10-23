@@ -193,9 +193,9 @@ It's called with OBJECT and STATUS."
   (lame//set-status step status 'lame//format-step-title))
 
 (cl-defmacro lame/step (&key (name "Unnamed Step")
-                              description
-                              preparation
-                              step)
+                             description
+                             preparation
+                             step)
   "A step with NAME of a task.
 Add DESCRIPTION to the `lame-task-buffer'.
 Then execute preparation.
@@ -305,13 +305,18 @@ Execute NEXT afterwards."
 If WRAP is non-nil wrap the text in a #+BEGIN_<wrap> #+END_<wrap> block.
 If LANG is non-nil add it like this:  #+BEGIN_<wrap> <lang>."
   (with-current-buffer lame-task-buffer
-    (goto-char (point-max))
-    (let* ((inhibit-read-only t))
+    (let* ((inhibit-read-only t)
+           (p (point-max)))
+      (goto-char p)
       (if wrap
-          (insert
-           (format
-            "\n#+BEGIN_%s%s\n%s\n#+END_%s"
-            wrap (if lang (concat " " lang) "") text wrap))
+          (progn
+            (insert
+             (format
+              "\n#+BEGIN_%s%s\n%s\n#+END_%s"
+              wrap (if lang (concat " " lang) "") text wrap))
+            (goto-char p)
+            (while (re-search-forward "^\*+ " nil t)
+              (replace-match ",\\&")))
         (insert (concat "\n" text))))))
 
 (put 'lame/add-text-to-description 'lisp-indent-function 'defun)
@@ -409,11 +414,11 @@ WRAP by default in EXAMPLE block.
 Use LANG if non-nil.
 If ansi is non-nil, apply ansi color codes first."
   (lame/add-text-to-description
-   (with-current-buffer (process-buffer lame-process)
-     (if ansi
-         (ansi-color-apply (buffer-string))
-       (buffer-string)))
-   :wrap wrap :lang lang))
+    (with-current-buffer (process-buffer lame-process)
+      (if ansi
+          (ansi-color-apply (buffer-string))
+        (buffer-string)))
+    :wrap wrap :lang lang))
 
 (defun lame-test ()
   "Test lame functions."
@@ -424,20 +429,17 @@ If ansi is non-nil, apply ansi color codes first."
       :description "Test lame functionality."
       :task
       (progn
-        (message "b")
+        (message "Some message")
         (lame/add-text-to-description "Execute steps")
         (lame/step
           :name "Edit text"
           :description "Edit some example test."
           :step
           (lame/edit-text
-            :msg "For the fun"
-            :text "Edit me!"
-            :var lame--test-var
+            :msg "For the fun" :text "Edit me!" :var lame--test-var
             :next
             (progn
-              (lame/add-text-to-description
-               lame--test-var :wrap "EXAMPLE")
+              (lame/add-text-to-description lame--test-var :wrap "EXAMPLE")
               (lame/step
                 :name "Switch Branch"
                 :description "Switch to branch Master."
