@@ -20,6 +20,7 @@
   (use-package helm-dash
     :defer t
     :init
+    (setq helm-dash-browser-func 'eww)
     (spacemacs/declare-prefix "d" "dash")
     (spacemacs/set-leader-keys
       "dh" 'helm-dash-at-point
