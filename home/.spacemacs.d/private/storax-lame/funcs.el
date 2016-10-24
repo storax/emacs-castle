@@ -338,12 +338,11 @@ If LANG is non-nil add it like this:  #+BEGIN_<wrap> <lang>."
 (cl-defmacro lame/execute-shell (command &key name (shell "sh") dir show-output stay on-error next)
   "Execute COMMAND in a shell.
 See `lame/execute'."
-  (macroexpand
-   `(lame/execute ,shell :args ("-c" ,command)
-      :name ,name :dir ,dir
-      :show-output ,show-output :stay ,stay
-      :on-error ,on-error
-      :next ,next)))
+ `(lame/execute ,shell :args (list "-c" ,command)
+    :name ,name :dir ,dir
+    :show-output ,show-output :stay ,stay
+    :on-error ,on-error
+    :next ,next)))
 
 (put 'lame/execute-shell 'lisp-indent-function 'defun)
 
@@ -357,36 +356,34 @@ ON-ERROR is the code to execute when the command fails.
 The process buffer will be displayed anyway.
 NEXT will be executed after the command sucessfully finishes.
 NEXT will also be the `lame-continue-callback' if something goes wrong."
-  (let ((on-error (or on-error '(message "Something went wrong.")))
-        (name (or name (concat command " " (mapconcat 'identity args " ")))))
-    `(progn
-       (setq lame-continue-callback
-             (lambda (&optional proc)
-               (let ((nextfn (lambda () ,next))
-                     (proc (or proc lame-process))
-                     (buf (process-buffer proc)))
-                 (if (process-live-p proc)
-                     (message "Process hasn't finished.")
-                   (progn
-                     (setq lame-continue-callback nextfn)
-                     (if (> (process-exit-status proc) 0)
-                         (progn
-                           (if (eq buf (current-buffer))
-                               (switch-to-buffer buf)
-                             (switch-to-buffer-other-window buf))
-                           (setq buffer-read-only t)
-                           ,on-error)
-                       (prog1
-                           (funcall lame-continue-callback)
-                         (unless ,stay (kill-buffer buf)))))))))
-       (let ((default-directory (or ,dir default-directory)))
-         (setq lame-process
-               (lame//async-start-process
-                ,name
-                ,command
-                lame-continue-callback ,@args))
-         (when ,show-output
-           (switch-to-buffer-other-window (process-buffer lame-process)))))))
+  `(progn
+     (setq lame-continue-callback
+           (lambda (&optional proc)
+             (let ((nextfn (lambda () ,next))
+                   (proc (or proc lame-process))
+                   (buf (process-buffer proc)))
+               (if (process-live-p proc)
+                   (message "Process hasn't finished.")
+                 (progn
+                   (setq lame-continue-callback nextfn)
+                   (if (> (process-exit-status proc) 0)
+                       (progn
+                         (if (eq buf (current-buffer))
+                             (switch-to-buffer buf)
+                           (switch-to-buffer-other-window buf))
+                         (setq buffer-read-only t)
+                         (or ,on-error (message "Something went wrong.")))
+                     (prog1
+                         (funcall lame-continue-callback)
+                       (unless ,stay (kill-buffer buf)))))))))
+     (let ((default-directory (or ,dir default-directory)))
+       (setq lame-process
+             (apply 'lame//async-start-process
+                    (or ,name (concat ,command " " (mapconcat 'identity ,args " ")))
+                    ,command
+                    lame-continue-callback ,args))
+       (when ,show-output
+         (switch-to-buffer-other-window (process-buffer lame-process)))))))
 
 (put 'lame/execute'lisp-indent-function 'defun)
 
