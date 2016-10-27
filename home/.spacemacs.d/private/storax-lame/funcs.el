@@ -14,6 +14,7 @@
 ;;; Code:
 (require 'cl-lib)
 (require 'async)
+(require 'comint)
 
 (defgroup lame nil
   "Do lame things more efficiently."
@@ -45,46 +46,47 @@
   :group 'lame)
 
 (cl-defstruct lame-task
-  name description)
+  name description metadata continue-cb current-step buffer edit-buffer process)
 
 (cl-defstruct lame-step
-  name description nodoc)
-
-(defvar lame-continue-callback nil
-  "Callback function continue current lame session.")
+  name description nodoc task)
 
 (defvar lame-current-task nil
   "The current task.")
 
 (defvar lame-current-step nil
-  "The current task.")
+  "The current step.")
 
-(defvar lame-task-buffer nil
-  "The current task buffer.")
+(defvar lame-tasks nil
+  "The current running lame tasks.")
 
-(defvar lame-edit-buffer nil
-  "The current edit buffer.")
+(defun lame/set (symbol newval)
+  "Set SYMBOL in the current task to NEWVAL."
+  (let ((map (lame-task-metadata lame-current-task)))
+    (map-put map symbol newval)
+    (setf (lame-task-metadata lame-current-task) map)))
 
-(defvar lame-process nil
-  "The current running lame process.")
+(defmacro lame/setq (symbol newval)
+  "Set SYMBOL in the current task to NEWVAL.
+SYMBOL is automatically quoted for you."
+  `(lame/set (quote ,symbol) ,newval))
 
-(defun lame/interactive-args (func)
-  "Get the interactive args of FUNC."
-  (advice-eval-interactive-spec (cadr (interactive-form func))))
+(defun lame/get (symbol &optional default)
+  "Get value of SYMBOL from current task."
+  (map-elt (lame-task-metadata lame-current-task) symbol default))
 
-(defmacro lame/let-interactive (spec &rest body)
-  "Get the interactive args of function in SPEC and let-bind them to SYMBOLS.
-Then evaluate BODY.
-SYMBOLS should be a list the length of the interactive args of FUNC.
+(defmacro lame/getq (symbol &optional default)
+  "Get value of SYMBOL from current task.
+SYMBOL is automatically quoted for you."
+  `(lame/get (quote ,symbol) ,default))
 
-\(fn (FUNC SYMBOLS) BODY...)"
-  (declare (indent 0))
-  (let* ((func (car spec))
-         (symbols (cadr spec))
-         (args (lame/interactive-args func))
-         (letlist (mapcar* #'list (setcdr (last symbols) symbols) args))) ;zipd
-    `(let ,letlist
-       ,@body)))
+(defun lame//add-task (task)
+  "Add TASK to running tasks."
+  (add-to-list 'lame-tasks task))
+
+(defun lame//rm-task (task)
+  "Remove TASK from running tasks."
+  (setq lame-tasks (remove task lame-tasks)))
 
 (cl-defmacro lame/task (&key (name "Unnamed Task")
                              description
@@ -97,46 +99,23 @@ Execute PREPARATION then ask the user to execute the task.
 Once the user continues, execute TASK.
 The task is marked as finished after calling `lame/done'."
   (declare (indent 0))
-  `(when (lame//cancel-current-task-p)
-     (when lame-task-buffer
-       (kill-buffer lame-task-buffer))
-     (lame//reset)
+  `(progn
      (setq lame-current-task (make-lame-task :name ,name :description ,description))
      (lame//prepare-task-buffer lame-current-task)
      ,task))
-
-(defun lame//cancel-current-task-p ()
-  "Check if a task is currently running.
-If a task is running, ask the user to cancel the current task
-then the decision of the user is returned.
-If no task is running t is returned."
-  (or (not lame-current-task) (y-or-n-p (format "Cancel currently running task \"%s\"? "
-                                                (lame-task-name lame-current-task)))))
 
 (defun lame//prepare-task-buffer (task)
   "Create a buffer to capture the progress of the given TASK."
   (let* ((name (lame-task-name task))
          (taskbuffername (lame//format-task-buffer-name name))
          (buffer (get-buffer-create taskbuffername)))
+    (setf (lame-task-buffer task) buffer)
     (with-current-buffer buffer
       (setq buffer-read-only t)
       (let ((inhibit-read-only t))
         (erase-buffer)
         (org-mode)
-        (lame//initial-buffer-contents task)))
-    (setq lame-task-buffer buffer)))
-
-(defun lame//reset ()
-  "Clear all lame global variables.
-Reset the following variables:
-- `lame-current-task'
-- `lame-current-step'
-- `lame-task-buffer'
-- `lame-continue-callback'"
-  (setq lame-current-task nil
-        lame-current-step nil
-        lame-task-buffer nil
-        lame-continue-callback nil))
+        (lame//initial-buffer-contents task)))))
 
 (defun lame//format-task-buffer-name (taskname)
   "Return a formated buffer name for the given TASKNAME."
@@ -144,11 +123,12 @@ Reset the following variables:
 
 (defun lame//initial-buffer-contents (task)
   "Fill the buffer with the initial contents for the given TASK."
-  (org-insert-heading nil nil t)
-  (let ((description (lame-task-description task)))
-    (insert (concat
-             (lame//format-task-title task lame-running-task-keyword) (when description "\n")
-             (lame//format-task-description description)))))
+  (with-current-buffer (lame-task-buffer task)
+    (org-insert-heading nil nil t)
+    (let ((description (lame-task-description task)))
+      (insert (concat
+               (lame//format-task-title task lame-running-task-keyword) (when description "\n")
+               (lame//format-task-description description))))))
 
 (defun lame//add-field (text value)
   "Add field to TEXT with the given VALUE."
@@ -172,11 +152,11 @@ Reset the following variables:
   "Return a formatted text for the given DESCRIPTION."
   description)
 
-(defun lame//set-status (object status textfunc)
-  "Replace the field of OBJECT with the new text.
+(defun lame//set-status (buffer object status textfunc)
+  "In BUFFER replace the field of OBJECT with the new text.
 STATUS is used for TEXTFUNC.
 It's called with OBJECT and STATUS."
-  (with-current-buffer lame-task-buffer
+  (with-current-buffer buffer
     (let* ((start (text-property-any (point-min) (point-max) 'field object))
            (end (field-end start t))
            (newtext (funcall textfunc object status))
@@ -186,13 +166,13 @@ It's called with OBJECT and STATUS."
       (insert newtext))))
 
 (defun lame//set-task-status (task status)
-  "For the given TASK set the STATUS."
-  (lame//set-status task status 'lame//format-task-title))
+  "vFor the given TASK set the STATUS."
+  (lame//set-status (lame-task-buffer task) task status 'lame//format-task-title))
 
 (defun lame//set-step-status (step status)
   "For the given STEP set the STATUS."
   (unless (lame-step-nodoc step)
-    (lame//set-status step status 'lame//format-step-title)))
+    (lame//set-status (lame-task-buffer (lame-step-task step)) step status 'lame//format-step-title)))
 
 (cl-defmacro lame/step (&key (name "Unnamed Step")
                              description
@@ -210,20 +190,26 @@ NODOC implies SILENT.
 When the user continues execute step."
   (declare (indent 0))
   `(progn
-     (when lame-current-step
-       (lame//set-step-status lame-current-step lame-done-keyword))
-     (unless (or ,silent ,nodoc)
-       (display-buffer lame-task-buffer '(display-buffer-reuse-window)))
-     (with-current-buffer lame-task-buffer
-       (setq lame-current-step (make-lame-step :name ,name :description ,description :nodoc ,nodoc))
-       (unless ,nodoc
-         (let ((inhibit-read-only t)
-               (desc ,description)
-               (title (lame//format-step-title lame-current-step lame-current-step-keyword)))
-           (goto-char (point-max))
-           (org-insert-heading nil nil t)
-           (org-demote)
-           (insert (concat title (when desc "\n") desc)))))
+     (let ((cur (lame-task-current-step lame-current-task)))
+       (when cur
+         (lame//set-step-status cur lame-done-keyword)))
+     (let ((taskbuf (lame-task-buffer lame-current-task)))
+       (unless (or ,silent ,nodoc)
+         (display-buffer taskbuf '(display-buffer-reuse-window)))
+       (with-current-buffer taskbuf
+         (let ((step (make-lame-step :name ,name
+                                     :description ,description
+                                     :nodoc ,nodoc
+                                     :task lame-current-task)))
+           (setf (lame-task-current-step lame-current-task) step)
+           (unless ,nodoc
+             (let ((inhibit-read-only t)
+                   (desc ,description)
+                   (title (lame//format-step-title step lame-current-step-keyword)))
+               (goto-char (point-max))
+               (org-insert-heading nil nil t)
+               (org-demote)
+               (insert (concat title (when desc "\n") desc)))))))
      (if (or ,silent ,nodoc)
          (progn ,preparation ,step)
        (lame/defer
@@ -233,35 +219,41 @@ When the user continues execute step."
 (defun lame/continue ()
   "Continue the current lame session."
   (interactive)
-  (when lame-continue-callback
-    (funcall lame-continue-callback)))
+  (let ((cb (lame-task-continue-cb lame-current-task)))
+    (when cb
+      (funcall cb))))
 
 (cl-defun lame/done (&key killbuf)
   "Call when you are done with the current task."
   (message "Task %s completed!" (lame-task-name lame-current-task))
-  (when lame-current-step
-    (lame//set-step-status lame-current-step lame-done-keyword))
+  (let ((step (lame-task-current-step lame-current-task)))
+    (when step
+      (lame//set-step-status step lame-done-keyword)))
   (lame//set-task-status lame-current-task lame-done-keyword)
   (when killbuf
-    (kill-buffer lame-task-buffer))
-  (lame//reset))
+    (kill-buffer (lame-task-buffer lame-current-task)))
+  (lame//rm-task lame-current-task)
+  (setq lame-current-task (nth 0 lame-tasks)))
 
 (cl-defmacro lame/defer (&key before after)
   "Evaluate BEFORE and return it's return value.
-Sets `lame-continue-callback' to evaluate AFTER."
+Sets `lame-task-continue-cb' to evaluate AFTER."
   (declare (indent 0))
   `(progn
-     (setq lame-continue-callback (lambda () ,after))
+     (setf (lame-task-continue-cb lame-current-task)
+           `(lambda ()
+              (progn (setq lame-current-task ,lame-current-task)
+                     ,',after)))
      ,before))
 
 (cl-defmacro lame/confirm (prompt &key before after)
   "Ask the user to continue with PROMPT after executing BEFORE.
-If the user agrees execute AFTER else set AFTER as `lame-continue-callback'."
+If the user agrees execute AFTER else set AFTER as `lame-task-continue-cb'."
   (declare (indent 0))
   `(lame/defer
      :before (progn ,before
                     (when (y-or-n-p ,prompt)
-                      (funcall lame-continue-callback)))
+                      (funcall (lame-task-continue-cb lame-current-task))))
      :after ,after))
 
 (put 'lame/confirm 'lisp-indent-function 'defun)
@@ -299,26 +291,28 @@ Execute NEXT afterwards."
   (declare (indent 0))
   `(lame/defer
      :before (progn
-               (setq lame-edit-buffer (switch-to-buffer-other-window (format "*lame: edit %s" ',var)))
+               (setf (lame-task-edit-buffer lame-current-task)
+                     (switch-to-buffer-other-window (format "*lame: edit %s" ',var)))
                (erase-buffer)
                (insert ,text)
                (when ',mode
                  (funcall ',mode))
                (message ,msg))
      :after (progn
-              (with-current-buffer lame-edit-buffer
-                (setq ,var (buffer-string))
-                (when (get-buffer-window)
-                  (delete-window (get-buffer-window)))
-                (kill-buffer lame-edit-buffer)
-                (setq lame-edit-buffer nil))
+              (let ((buf (lame-task-edit-buffer lame-current-task)))
+                (with-current-buffer buf
+                  (lame/setq ,var (buffer-string))
+                  (when (get-buffer-window)
+                    (delete-window (get-buffer-window)))
+                  (kill-buffer buf)
+                  (setf (lame-task-edit-buffer lame-current-task) nil)))
               ,next)))
 
 (cl-defun lame/add-text-to-description (text &key wrap lang)
   "Add TEXT to the description of the current task/step.
 If WRAP is non-nil wrap the text in a #+BEGIN_<wrap> #+END_<wrap> block.
 If LANG is non-nil add it like this:  #+BEGIN_<wrap> <lang>."
-  (with-current-buffer lame-task-buffer
+  (with-current-buffer (lame-task-buffer lame-current-task)
     (let* ((inhibit-read-only t)
            (p (point-max)))
       (goto-char p)
@@ -338,11 +332,11 @@ If LANG is non-nil add it like this:  #+BEGIN_<wrap> <lang>."
 (cl-defmacro lame/execute-shell (command &key name (shell "sh") dir show-output stay on-error next)
   "Execute COMMAND in a shell.
 See `lame/execute'."
- `(lame/execute ,shell :args (list "-c" ,command)
-    :name ,name :dir ,dir
-    :show-output ,show-output :stay ,stay
-    :on-error ,on-error
-    :next ,next)))
+  `(lame/execute ,shell :args (list "-c" ,command)
+     :name ,name :dir ,dir
+     :show-output ,show-output :stay ,stay
+     :on-error ,on-error
+     :next ,next))
 
 (put 'lame/execute-shell 'lisp-indent-function 'defun)
 
@@ -355,37 +349,42 @@ If non-nil SHOW-OUTPUT will display the process buffer right away.
 ON-ERROR is the code to execute when the command fails.
 The process buffer will be displayed anyway.
 NEXT will be executed after the command sucessfully finishes.
-NEXT will also be the `lame-continue-callback' if something goes wrong."
+NEXT will also be the `lame-task-continue-cb' if something goes wrong."
   `(progn
-     (setq lame-continue-callback
-           (lambda (&optional proc)
-             (let ((nextfn (lambda () ,next))
-                   (proc (or proc lame-process))
-                   (buf (process-buffer proc)))
-               (if (process-live-p proc)
-                   (message "Process hasn't finished.")
-                 (progn
-                   (setq lame-continue-callback nextfn)
-                   (if (> (process-exit-status proc) 0)
-                       (progn
-                         (if (eq buf (current-buffer))
-                             (switch-to-buffer buf)
-                           (switch-to-buffer-other-window buf))
-                         (setq buffer-read-only t)
-                         (or ,on-error (message "Something went wrong.")))
-                     (prog1
-                         (funcall lame-continue-callback)
-                       (unless ,stay (kill-buffer buf)))))))))
+     (setf (lame-task-continue-cb lame-current-task)
+           `(lambda (&optional proc)
+              (setq lame-current-task ,lame-current-task)
+              (let* ((nextfn (lambda ()
+                               `(setq lame-current-task ,,lame-current-task)
+                               ,',next))
+                     (proc (or proc (lame-task-process lame-current-task)))
+                     (buf (and proc (process-buffer proc))))
+                (if (process-live-p proc)
+                    (message "Process hasn't finished.")
+                  (progn
+                    (setf (lame-task-continue-cb lame-current-task) nextfn)
+                    (if (> (process-exit-status proc) 0)
+                        (progn
+                          (if (eq buf (current-buffer))
+                              (switch-to-buffer buf)
+                            (switch-to-buffer-other-window buf))
+                          (setq buffer-read-only t)
+                          (if ',',on-error
+                              ,',on-error
+                            (message "Something went wrong.")))
+                      (prog1
+                          (funcall (lame-task-continue-cb lame-current-task))
+                        (unless ,,stay (kill-buffer buf)))))))))
      (let ((default-directory (or ,dir default-directory)))
-       (setq lame-process
+       (setf (lame-task-process lame-current-task)
              (apply 'lame//async-start-process
                     (or ,name (concat ,command " " (mapconcat 'identity ,args " ")))
                     ,command
-                    lame-continue-callback ,args))
+                    (lame-task-continue-cb lame-current-task) ,args))
        (when ,show-output
-         (switch-to-buffer-other-window (process-buffer lame-process)))))))
+         (switch-to-buffer-other-window (process-buffer (lame-task-process lame-current-task)))))))
 
-(put 'lame/execute'lisp-indent-function 'defun)
+(put 'lame/execute 'lisp-indent-function 'defun)
 
 (defun lame//async-start-process (name program finish-func &rest program-args)
   "Start the executable PROGRAM asynchronously.  See `async-start'.
@@ -398,7 +397,11 @@ working directory."
          (proc (let ((process-connection-type nil))
                  (apply #'start-process name buf program program-args))))
     (with-current-buffer buf
+      (set (make-local-variable 'default-directory) default-directory)
+      (message "start. buf: %s finishfunc: %s" buf finish-func)
       (set (make-local-variable 'async-callback) finish-func)
+      (message "start. buf: %s finishfunc: %s" buf async-callback)
+      (require 'shell) (shell-mode)
       (set-process-sentinel proc #'lame//async-when-done)
       (unless (string= name "emacs")
         (set (make-local-variable 'async-callback-for-process) t))
@@ -410,8 +413,8 @@ working directory."
     (with-current-buffer (process-buffer proc)
       (let ((async-current-process proc))
         (if async-callback-for-process
-            (if async-callback
-                (funcall async-callback proc)
+            (if (lame-task-continue-cb lame-current-task)
+                (funcall (lame-task-continue-cb lame-current-task))
               (set (make-local-variable 'async-callback-value) proc)
               (set (make-local-variable 'async-callback-value-set) t))
           (goto-char (point-max))
@@ -424,13 +427,15 @@ working directory."
 WRAP by default in EXAMPLE block.
 Use LANG if non-nil.
 If ansi is non-nil, apply ansi color codes first."
-  (when (and lame-process (process-buffer lame-process))
-    (lame/add-text-to-description
-      (with-current-buffer (process-buffer lame-process)
-        (if ansi
-            (ansi-color-apply (buffer-string))
-          (buffer-string)))
-      :wrap wrap :lang lang)))
+  (let* ((proc (lame-task-process lame-current-task))
+         (buf (and proc (process-buffer proc))))
+    (when buf
+      (lame/add-text-to-description
+        (with-current-buffer buf
+          (if ansi
+              (ansi-color-apply (buffer-string))
+            (buffer-string)))
+        :wrap wrap :lang lang))))
 
 (defun lame-test ()
   "Test lame functions."
@@ -449,10 +454,10 @@ If ansi is non-nil, apply ansi color codes first."
           :description "Edit some example test."
           :step
           (lame/edit-text
-            :msg "For the fun" :text "Edit me!" :var lame--test-var
+            :msg "For the fun" :text "Edit me!" :var test-var
             :next
             (progn
-              (lame/add-text-to-description lame--test-var :wrap "EXAMPLE")
+              (lame/add-text-to-description (lame/getq test-var) :wrap "EXAMPLE")
               (lame/step
                 :name "Switch Branch"
                 :description "Switch to branch Master."
@@ -464,8 +469,9 @@ If ansi is non-nil, apply ansi color codes first."
                     :description "Execute awesome shell command"
                     :preparation (lame/add-text-to-description "curl wttr.in/london" :wrap "SRC" :lang "sh")
                     :step
-                    (lame/execute-shell "curl -s wttr.in/london"
+                    (lame/execute-shell "curl -s wttr.in/london && exit 1"
                       :show-output t
+                      :on-error (message "asdf2sdf")
                       :next
                       (progn
                         (lame/add-process-output :ansi t)
