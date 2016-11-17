@@ -20,6 +20,7 @@
   (use-package yasnippet
     :init
     (add-to-list 'warning-suppress-types '(yasnippet backquote-change))
+    (spacemacs/add-to-hook 'text-mode-hook '(yas-minor-mode))
     :config
     (progn
       ;; Put spacemacs snippets to the front
