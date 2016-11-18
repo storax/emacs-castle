@@ -84,6 +84,7 @@ values."
      storax-iedit
      storax-helm
      storax-helm-icons
+     storax-hydra
      storax-smartparens
      storax-flycheck
      storax-projectile
