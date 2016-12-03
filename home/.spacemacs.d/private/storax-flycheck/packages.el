@@ -89,3 +89,4 @@ forwards, if negative)."
     (spacemacs/set-leader-keys "ep" 'storax/previous-error-wrapped)))
 
 ;;; packages.el ends here
+

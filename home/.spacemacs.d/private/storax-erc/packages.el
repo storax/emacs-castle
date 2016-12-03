@@ -57,7 +57,7 @@
   (spacemacs|define-custom-layout "@ERC"
     :binding "E"
     :body
-    (progn
+   (progn
       (defun spacemacs-layouts/add-erc-buffer-to-persp ()
         (persp-add-buffer (current-buffer)
                           (persp-get-by-name

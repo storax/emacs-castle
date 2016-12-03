@@ -73,15 +73,10 @@ values."
      storax-icons
      storax-utils
      storax-unkillable-scratch
-     storax-ace-window
      storax-avy
      storax-popup
      storax-dabbrev
-     storax-expand-region
      storax-fold-dwim
-     storax-multiple-cursors
-     storax-drag-stuff
-     storax-iedit
      storax-helm
      storax-helm-icons
      storax-hydra
@@ -90,7 +85,6 @@ values."
      storax-projectile
      storax-python
      storax-org
-     storax-magit
      ;;storax-latex
      (storax-dash
       :variables
@@ -336,15 +330,6 @@ layers configuration. You are free to put any user code."
     :defer t
     :config
     (setq reb-re-syntax 'string))
-  ;; isearch
-  (use-package isearch
-    :defer t
-    :init
-    (defun storax/isearch-kill ()
-      "Push current matching string into kill ring."
-      (interactive)
-      (kill-new isearch-string))
-    (bind-key "M-w" 'storax/isearch-kill isearch-mode-map))
   ;; layouts
   (spacemacs|define-custom-layout "@Spacemacs"
     :binding "e"
@@ -354,7 +339,6 @@ layers configuration. You are free to put any user code."
      (find-file-noselect "~/.spacemacs.d/private/storax-org/packages.el"))
     (persp-add-buffer ".spacemacs"))
 
-  (bind-key "C-x C-k" 'kill-buffer)
   ;; Builtin Auto Modes
   (add-to-list 'auto-mode-alist '("\\.qss$" . css-mode))
   ;; Aliases

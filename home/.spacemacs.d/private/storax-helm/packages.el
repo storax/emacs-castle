@@ -19,10 +19,6 @@
 (defun storax-helm/post-init-helm ()
   (use-package helm
     :defer t
-    :bind (("C-x C-f" . helm-find-files)
-           ;("M-y" . helm-show-kill-ring)
-           ("C-x C-h C-i" . helm-imenu)
-           ("C-x b" . helm-mini))
     :init
     (setq helm-move-to-line-cycle-in-source     t ; move to end or beginning of source when reaching top or bottom of source.
           helm-scroll-amount                    8 ; scroll 8 lines other window using M-<next>/M-<prior>
@@ -35,15 +31,6 @@
     (helm-push-mark-mode 1)
     (advice-add #'helm-preselect :around #'storax/helm-skip-dots)
     (advice-add #'helm-ff-move-to-first-real-candidate :around #'storax/helm-skip-dots)))
-
-(defun storax-helm/post-init-helm-swoop ()
-  (use-package helm-swoop
-    :defer t
-    :config
-    (bind-key "C-r" 'helm-previous-line helm-swoop-map)
-    (bind-key "C-s" 'helm-next-line helm-swoop-map)
-    (bind-key "C-r" 'helm-previous-line helm-multi-swoop-map)
-    (bind-key "C-s" 'helm-next-line helm-multi-swoop-map)))
 
 (defun storax-helm/post-init-helm-ag ()
   (use-package helm-ag

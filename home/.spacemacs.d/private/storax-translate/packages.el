@@ -24,6 +24,6 @@
           google-translate-default-target-language "de"
           google-translate-translation-directions-alist
           '(("en" . "de") ("de" . "en")))
-    (spacemacs/set-leader-keys "xgs" 'google-translate-smooth-translate)))
+    (spacemacs/set-leader-keys "at" 'google-translate-smooth-translate)))
 
 ;;; packages.el ends here

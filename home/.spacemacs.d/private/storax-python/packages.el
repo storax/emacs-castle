@@ -50,17 +50,17 @@
     :defer t
     :config
     (add-hook 'python-mode-hook 'storax/set-flycheck-error-function)
-    (bind-key "C-c C-p" 'storax/previous-error-wrapped python-mode-map)
-    (bind-key "M-n" 'python-nav-forward-block python-mode-map)
-    (bind-key "M-p" 'python-nav-backward-block python-mode-map)
-    (bind-key "C-M-f" 'python-nav-forward-sexp python-mode-map)
-    (bind-key "C-M-b" 'python-nav-backward-sexp python-mode-map)
-    (bind-key "C-M-n" 'python-nav-forward-defun python-mode-map)
-    (bind-key "C-M-p" 'python-nav-backward-defun python-mode-map)
-    (bind-key "M-a" 'python-nav-beginning-of-statement python-mode-map)
-    (bind-key "M-e" 'python-nav-end-of-statement python-mode-map)
-    (bind-key "C-M-a" 'python-nav-beginning-of-block python-mode-map)
-    (bind-key "C-M-e" 'python-nav-end-of-block python-mode-map)
+    ;; (bind-key "C-c C-p" 'storax/previous-error-wrapped python-mode-map)
+    ;; (bind-key "M-n" 'python-nav-forward-block python-mode-map)
+    ;; (bind-key "M-p" 'python-nav-backward-block python-mode-map)
+    ;; (bind-key "C-M-f" 'python-nav-forward-sexp python-mode-map)
+    ;; (bind-key "C-M-b" 'python-nav-backward-sexp python-mode-map)
+    ;; (bind-key "C-M-n" 'python-nav-forward-defun python-mode-map)
+    ;; (bind-key "C-M-p" 'python-nav-backward-defun python-mode-map)
+    ;; (bind-key "M-a" 'python-nav-beginning-of-statement python-mode-map)
+    ;; (bind-key "M-e" 'python-nav-end-of-statement python-mode-map)
+    ;; (bind-key "C-M-a" 'python-nav-beginning-of-block python-mode-map)
+    ;; (bind-key "C-M-e" 'python-nav-end-of-block python-mode-map)
 
     (spacemacs/set-leader-keys-for-major-mode 'python-mode
       "d SPC" 'storax/pdb-break
