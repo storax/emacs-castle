@@ -14,7 +14,7 @@
 ;;; Code:
 
 (defconst storax-helm-packages
-  '(helm helm-swoop helm-ag))
+  '(helm helm-ag))
 
 (defun storax-helm/post-init-helm ()
   (use-package helm
